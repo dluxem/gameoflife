@@ -1,0 +1,39 @@
+@page
+@model GameOfLife.Web.Pages.Maps.BrowseModel
+@{
+    ViewData["Title"] = "Browse Maps";
+}
+
+<div class="browse-container">
+    <h1 class="section-title">BROWSE MAPS</h1>
+
+    @if (!Model.Maps.Any())
+    {
+        <div class="empty-state">
+            <p>NO MAPS FOUND</p>
+            <a asp-page="/Maps/Edit" class="arcade-btn primary">CREATE THE FIRST MAP</a>
+        </div>
+    }
+    else
+    {
+        <div class="map-grid">
+            @foreach (var map in Model.Maps)
+            {
+                <a asp-page="/Maps/Play" asp-route-code="@map.ShareCode" class="map-card">
+                    <div class="map-card-preview" data-width="@map.Width" data-height="@map.Height"
+                         data-cells="@map.CellData"></div>
+                    <div class="map-card-info">
+                        <span class="map-name">@map.Name</span>
+                        <span class="map-size">@(map.Width)x@(map.Height)</span>
+                        <span class="map-code">@map.ShareCode</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/gameoflife.js" asp-append-version="true"></script>
+    <script src="~/js/preview.js" asp-append-version="true"></script>
+}

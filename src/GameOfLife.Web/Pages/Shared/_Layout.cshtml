@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GAME OF LIFE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="arcade-nav">
+            <a class="nav-logo" asp-page="/Index">GAME OF LIFE</a>
+            <div class="nav-links">
+                <a asp-page="/Index" class="nav-btn">HOME</a>
+                <a asp-page="/Maps/Edit" class="nav-btn">NEW MAP</a>
+                <a asp-page="/Maps/Browse" class="nav-btn">BROWSE</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        @RenderBody()
+    </main>
+    <footer class="arcade-footer">
+        <span class="blink">INSERT COIN</span>
+        <span>&copy; 2026 GAME OF LIFE</span>
+        <span class="blink">PRESS START</span>
+    </footer>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

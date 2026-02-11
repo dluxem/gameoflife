@@ -1,0 +1,17 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="error-screen">
+    <h1 class="glitch" data-text="GAME OVER">GAME OVER</h1>
+    <p>AN ERROR OCCURRED WHILE PROCESSING YOUR REQUEST.</p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="error-detail">REQUEST ID: <code>@Model.RequestId</code></p>
+    }
+
+    <a asp-page="/Index" class="arcade-btn primary">CONTINUE?</a>
+</div>

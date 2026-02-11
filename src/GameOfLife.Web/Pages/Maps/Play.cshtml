@@ -1,0 +1,62 @@
+@page "{code?}"
+@model GameOfLife.Web.Pages.Maps.PlayModel
+@{
+    ViewData["Title"] = Model.Map != null ? $"Playing: {Model.Map.Name}" : "Map Not Found";
+}
+
+@if (Model.Map == null)
+{
+    <div class="error-screen">
+        <h1 class="glitch" data-text="MAP NOT FOUND">MAP NOT FOUND</h1>
+        <p>The share code you entered does not match any saved map.</p>
+        <a asp-page="/Index" class="arcade-btn primary">RETURN HOME</a>
+    </div>
+}
+else
+{
+    <div class="play-container">
+        <div class="play-header">
+            <h1 class="map-title">@Model.Map.Name</h1>
+            <div class="play-info">
+                <span class="info-badge">@(Model.Map.Width)x@(Model.Map.Height)</span>
+                <span class="info-badge share-code">@Model.Map.ShareCode</span>
+            </div>
+        </div>
+
+        <div class="play-area">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div class="play-controls">
+            <button id="btnPlay" class="arcade-btn primary">PLAY</button>
+            <button id="btnStep" class="arcade-btn">STEP</button>
+            <button id="btnReset" class="arcade-btn">RESET</button>
+            <div class="speed-control">
+                <label for="speed">SPEED:</label>
+                <input type="range" id="speed" min="1" max="30" value="10" class="arcade-range" />
+                <span id="speedLabel">10</span>
+            </div>
+            <span class="generation-counter">GEN: <span id="genCount">0</span></span>
+            <span class="population-counter">POP: <span id="popCount">0</span></span>
+        </div>
+
+        <div class="play-actions">
+            <button id="btnCopyCode" class="arcade-btn" data-code="@Model.Map.ShareCode">COPY SHARE CODE</button>
+            <a asp-page="/Maps/Edit" asp-route-code="@Model.Map.ShareCode" class="arcade-btn">EDIT / FORK</a>
+        </div>
+    </div>
+
+    <script id="mapData" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        width = Model.Map.Width,
+        height = Model.Map.Height,
+        cellData = Model.Map.CellData
+    }))</script>
+}
+
+@section Scripts {
+    @if (Model.Map != null)
+    {
+        <script src="~/js/gameoflife.js" asp-append-version="true"></script>
+        <script src="~/js/play.js" asp-append-version="true"></script>
+    }
+}
