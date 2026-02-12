@@ -54,7 +54,7 @@
     document.getElementById('btnApplySize').addEventListener('click', () => {
         const newW = parseInt(document.getElementById('mapWidth').value, 10);
         const newH = parseInt(document.getElementById('mapHeight').value, 10);
-        if (newW >= 3 && newW <= 200 && newH >= 3 && newH <= 200) {
+        if (newW >= 3 && newW <= 256 && newH >= 3 && newH <= 256) {
             width = newW;
             height = newH;
             game = new GameOfLife(width, height);

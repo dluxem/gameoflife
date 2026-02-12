@@ -23,6 +23,8 @@ Forking a map from the player (`EDIT / FORK` button) opens the editor pre-loaded
 
 Maps are shared as **base-62 encoded binary strings**. There is no server-side storage; the entire map state is carried in the code itself.
 
+The encoder uses **adaptive encoding** — it tries four different encoding modes and picks whichever produces the smallest output. Typical Game of Life patterns are sparse, so coordinate and RLE modes usually beat raw bitmaps by 10–100×.
+
 ### Charset
 
 ```
@@ -33,35 +35,69 @@ Maps are shared as **base-62 encoded binary strings**. There is no server-side s
 
 ### Binary Layout
 
-The code encodes a byte array with the following structure:
-
 ```
-+--------+--------+--------------------+----------+
-| Byte 0 | Byte 1 | Bytes 2 .. N       | Byte N+1 |
-| Width  | Height | Cell data (packed)  | CRC-8    |
-+--------+--------+--------------------+----------+
++----------+----------+------+------------------+-------+
+| Byte 0   | Byte 1   | Byte 2 | Bytes 3 .. N   | Last  |
+| Width-1  | Height-1 | Mode   | Payload          | CRC-8 |
++----------+----------+------+------------------+-------+
 ```
 
 | Field | Size | Description |
 |-------|------|-------------|
-| Width | 1 byte (uint8) | Board width, valid range 3–200 |
-| Height | 1 byte (uint8) | Board height, valid range 3–200 |
-| Cell data | ⌈(width × height) / 8⌉ bytes | 1 bit per cell: `1` = alive, `0` = dead. Bits are packed MSB-first. Cells are ordered left-to-right, top-to-bottom. If the total cell count is not a multiple of 8, the final byte is zero-padded on the right. |
-| Checksum | 1 byte | CRC-8 of all preceding bytes (polynomial `0x07`, init `0x00`) |
+| Width | 1 byte (uint8) | Board width **minus 1**. Valid widths 3–256, stored as 2–255. |
+| Height | 1 byte (uint8) | Board height **minus 1**. Same range. |
+| Mode | 1 byte | Encoding mode (0–3, see below). |
+| Payload | variable | Cell data in the format specified by *mode*. |
+| Checksum | 1 byte | CRC-8 of all preceding bytes (polynomial `0x07`, init `0x00`). |
+
+### Encoding Modes
+
+#### Mode 0 — Raw Bitmap
+
+1 bit per cell, MSB-first, left-to-right top-to-bottom. The final byte is zero-padded on the right if the total cell count is not a multiple of 8.
+
+Best for small boards or boards near 50 % density.
+
+#### Mode 1 — Run-Length Encoding (RLE)
+
+Runs alternate between dead and alive cells, always starting with a dead run (which may be length 0). Each run length is encoded as a **varint**:
+
+| First byte pattern | Bytes | Value range |
+|--------------------|-------|-------------|
+| `0x00`–`0x7F` | 1 | 0 – 127 |
+| `0x80 \| hi6`, `lo8` | 2 | 128 – 16 383 |
+| `0xC0 \| hi6`, `mid8`, `lo8` | 3 | 16 384 – 4 194 303 |
+
+Best for structured patterns with long runs (lines, blocks, spaceships).
+
+#### Mode 2 — Alive-Cell Coordinate List
+
+Pairs of `(x, y)` bytes, one pair per alive cell. No count is stored; the number of pairs is inferred from the payload length.
+
+Best for sparse boards (most cells dead).
+
+#### Mode 3 — Dead-Cell Coordinate List
+
+Same format as mode 2, but lists the *dead* cells. All unlisted cells are alive.
+
+Best for very dense boards (most cells alive).
 
 ### Encoding Steps
 
-1. Build the byte array: `[width, height, ...cellBits, crc8]`
-2. Interpret the byte array as a single big-endian unsigned integer.
-3. Convert that integer to base-62 using repeated division, mapping remainders to the charset.
+1. Compute the payload under all four modes.
+2. Build the full byte array for each: `[width-1, height-1, mode, ...payload, crc8]`.
+3. Pick the shortest byte array.
+4. Interpret it as a big-endian unsigned integer.
+5. Convert to base-62 using repeated division, mapping remainders to the charset.
 
 ### Decoding Steps
 
 1. Convert the base-62 string back to a big integer.
 2. Extract bytes from the integer (big-endian).
-3. Pop the last byte as the CRC-8 checksum; verify it against the remaining bytes.
-4. Read width and height from bytes 0 and 1.
-5. Unpack the remaining bytes into a flat cell grid, 1 bit per cell, MSB-first.
+3. Pop the last byte as the CRC-8 checksum; verify against the remaining bytes.
+4. Read `width = byte[0] + 1`, `height = byte[1] + 1`.
+5. Read `mode = byte[2]`.
+6. Decode the remaining payload bytes according to the mode.
 
 ### CRC-8
 
@@ -77,15 +113,20 @@ for each byte:
         crc &= 0xFF
 ```
 
-### Example
+### Size Examples
 
-A 5×5 grid with a glider pattern encodes to `6THLHCcnN` (9 characters).
-A 100×100 random grid encodes to roughly 1,700 characters.
+| Board | Density | Mode chosen | Code length |
+|-------|---------|-------------|-------------|
+| 5×5 glider | 5 cells | bitmap | ~12 chars |
+| 30×30 sparse | ~50 cells | coordinates | ~140 chars |
+| 100×100 random 30 % | ~3 000 cells | bitmap | ~1 700 chars |
+| 256×256 sparse | 200 cells | coordinates | ~550 chars |
+| 256×256 empty | 0 cells | coordinates | ~7 chars |
 
 ### Limitations
 
-- Board dimensions are stored as single bytes, so the maximum size is 200×200 (enforced in the UI and codec).
-- Very large boards produce long codes. A fully populated 200×200 grid ≈ 5,003 bytes ≈ ~6,700 base-62 characters.
+- Board dimensions are stored as single bytes (width−1, height−1), so the maximum size is **256×256**.
+- Random boards near 50 % density still produce long codes because no encoding mode can compress random data. A 256×256 random grid at 50 % ≈ ~11 000 base-62 characters.
 - JavaScript `BigInt` is used for the base conversion, which is available in all modern browsers.
 
 ## Front-End Dependencies
