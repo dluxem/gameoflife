@@ -90,11 +90,10 @@ A 100×100 random grid encodes to roughly 1,700 characters.
 
 ## Front-End Dependencies
 
-| Dependency | Version | CDN | Purpose |
-|------------|---------|-----|---------|
-| [HTMX](https://htmx.org/) | 2.0.4 | `unpkg.com/htmx.org@2.0.4` | Included for progressive enhancement and future dynamic interactions. Currently the application is fully static. |
-| [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) | — | Google Fonts | Pixel-style arcade font used for headings, buttons, and labels |
-| [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) | — | Google Fonts | Monospace body font |
+| Dependency | CDN | Purpose |
+|------------|-----|---------|
+| [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) | Google Fonts | Pixel-style arcade font used for headings, buttons, and labels |
+| [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) | Google Fonts | Monospace body font |
 
 All application logic (Game of Life engine, codec, editor, player) is vanilla JavaScript with no framework or build step.
 
@@ -109,13 +108,12 @@ public/
 │   └── site.css            80s arcade theme
 └── js/
     ├── codec.js            Map code encode/decode (base-62, CRC-8)
-    ├── gameoflife.js        Game engine + canvas renderer
-    ├── editor.js            Editor page logic
-    └── play.js              Player page logic
+    ├── gameoflife.js       Game engine + canvas renderer
+    ├── editor.js           Editor page logic
+    └── play.js             Player page logic
 Dockerfile                  nginx:alpine for local testing
 nginx.conf                  nginx config (port 8080)
 docker-compose.yml          Docker Compose wrapper
-wrangler.toml               Cloudflare Workers deployment config
 ```
 
 ## Running Locally
@@ -135,14 +133,6 @@ Serve the `public/` directory with any static file server:
 ```bash
 npx serve public
 ```
-
-## Deploying to Cloudflare
-
-```bash
-npx wrangler deploy
-```
-
-This uses the `[assets]` configuration in `wrangler.toml` to serve the contents of `public/` as a Cloudflare Worker.
 
 ## License
 
