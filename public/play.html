@@ -51,9 +51,24 @@
                 <span class="population-counter">POP: <span id="popCount">0</span></span>
             </div>
 
+            <div class="play-share">
+                <div class="share-row">
+                    <div class="share-label-row">
+                        <span class="share-label">MAP CODE:</span>
+                        <button id="btnCopyCode" class="arcade-btn small">COPY</button>
+                    </div>
+                    <textarea id="codeBox" class="arcade-input code-box" rows="3" readonly></textarea>
+                </div>
+                <div class="share-row">
+                    <div class="share-label-row">
+                        <span class="share-label">URL:</span>
+                        <button id="btnCopyUrl" class="arcade-btn small">COPY</button>
+                    </div>
+                    <textarea id="urlBox" class="arcade-input code-box" rows="3" readonly></textarea>
+                </div>
+            </div>
+
             <div class="play-actions">
-                <button id="btnCopyCode" class="arcade-btn">COPY CODE</button>
-                <button id="btnCopyUrl" class="arcade-btn">COPY URL</button>
                 <a id="btnEdit" href="edit.html" class="arcade-btn">EDIT / FORK</a>
             </div>
         </div>

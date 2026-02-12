@@ -54,7 +54,7 @@
     document.getElementById('btnApplySize').addEventListener('click', () => {
         const newW = parseInt(document.getElementById('mapWidth').value, 10);
         const newH = parseInt(document.getElementById('mapHeight').value, 10);
-        if (newW >= 3 && newW <= 200 && newH >= 3 && newH <= 200) {
+        if (newW >= 3 && newW <= 256 && newH >= 3 && newH <= 256) {
             width = newW;
             height = newH;
             game = new GameOfLife(width, height);
@@ -104,14 +104,17 @@
 
         resultEl.className = 'save-result success';
         resultEl.innerHTML =
-            '<div class="result-row"><span>MAP CODE:</span> <strong>' + escapeHtml(code) + '</strong> ' +
-            '<button class="arcade-btn small copy-btn" data-copy="' + escapeHtml(code) + '">COPY</button></div>' +
-            '<div class="result-row"><span>URL:</span> <input type="text" class="arcade-input url-output" value="' + escapeHtml(url) + '" readonly /> ' +
-            '<button class="arcade-btn small copy-btn" data-copy="' + escapeHtml(url) + '">COPY</button></div>';
+            '<div class="result-row"><span>MAP CODE:</span> ' +
+            '<button class="arcade-btn small copy-btn" data-target="saveCodeBox">COPY</button></div>' +
+            '<textarea id="saveCodeBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(code) + '</textarea>' +
+            '<div class="result-row"><span>URL:</span> ' +
+            '<button class="arcade-btn small copy-btn" data-target="saveUrlBox">COPY</button></div>' +
+            '<textarea id="saveUrlBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(url) + '</textarea>';
 
         resultEl.querySelectorAll('.copy-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+                const target = document.getElementById(btn.dataset.target);
+                navigator.clipboard.writeText(target.value).then(() => {
                     const orig = btn.textContent;
                     btn.textContent = 'COPIED!';
                     setTimeout(() => { btn.textContent = orig; }, 1500);
