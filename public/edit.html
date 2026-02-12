@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEW MAP - GAME OF LIFE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="arcade-nav">
+            <a class="nav-logo" href="index.html">GAME OF LIFE</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">HOME</a>
+                <a href="edit.html" class="nav-btn">NEW MAP</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="edit-container">
+            <div class="edit-header">
+                <h1 class="map-title">NEW MAP</h1>
+            </div>
+
+            <div class="edit-settings">
+                <div class="form-row">
+                    <label for="mapWidth">WIDTH:</label>
+                    <input type="number" id="mapWidth" value="30" min="3" max="200" class="arcade-input small" />
+                </div>
+                <div class="form-row">
+                    <label for="mapHeight">HEIGHT:</label>
+                    <input type="number" id="mapHeight" value="30" min="3" max="200" class="arcade-input small" />
+                </div>
+                <button id="btnApplySize" class="arcade-btn">APPLY SIZE</button>
+            </div>
+
+            <div class="edit-toolbar">
+                <button id="btnDraw" class="arcade-btn active" data-tool="draw">DRAW</button>
+                <button id="btnErase" class="arcade-btn" data-tool="erase">ERASE</button>
+                <button id="btnClear" class="arcade-btn">CLEAR</button>
+                <button id="btnRandom" class="arcade-btn">RANDOM</button>
+                <button id="btnInvert" class="arcade-btn">INVERT</button>
+            </div>
+
+            <div class="edit-area">
+                <canvas id="editCanvas"></canvas>
+            </div>
+
+            <div class="edit-actions">
+                <button id="btnPreview" class="arcade-btn">PREVIEW</button>
+                <button id="btnSave" class="arcade-btn primary">SAVE</button>
+            </div>
+
+            <div id="saveResult" class="save-result"></div>
+
+            <div id="previewModal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>PREVIEW</h2>
+                        <button id="btnClosePreview" class="arcade-btn small">X</button>
+                    </div>
+                    <canvas id="previewCanvas"></canvas>
+                    <div class="play-controls">
+                        <button id="btnPreviewPlay" class="arcade-btn primary">PLAY</button>
+                        <button id="btnPreviewStep" class="arcade-btn">STEP</button>
+                        <button id="btnPreviewReset" class="arcade-btn">RESET</button>
+                        <span class="generation-counter">GEN: <span id="previewGenCount">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="arcade-footer">
+        <span class="blink">INSERT COIN</span>
+        <span>&copy; 2026 Doug Luxem</span>
+        <span class="blink">PRESS START</span>
+    </footer>
+    <script src="js/gameoflife.js"></script>
+    <script src="js/codec.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>
