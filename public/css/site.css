@@ -196,11 +196,16 @@ main {
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
 }
 .arcade-input.small { width: 80px; }
-.arcade-input.url-output {
+.arcade-input.code-box {
     width: 100%;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     text-transform: none;
-    margin-top: 0.25rem;
+    resize: vertical;
+    word-break: break-all;
+    line-height: 1.4;
+    min-height: 2.4em;
+    max-height: 12em;
+    overflow-y: auto;
 }
 
 .arcade-range {
@@ -227,10 +232,9 @@ main {
 }
 .share-form {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 0.75rem;
-    flex-wrap: wrap;
 }
 .share-form label {
     font-family: var(--font-arcade);
@@ -238,9 +242,9 @@ main {
     color: var(--neon-yellow);
 }
 .share-form .arcade-input {
-    width: 300px;
-    text-align: center;
-    letter-spacing: 2px;
+    width: 100%;
+    max-width: 500px;
+    letter-spacing: 1px;
 }
 .code-error {
     font-family: var(--font-arcade);
@@ -321,6 +325,25 @@ main {
     padding: 0.3rem 0.5rem;
     border: 1px solid var(--neon-magenta);
 }
+.play-share {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--text-dim);
+}
+.share-row { margin-bottom: 0.75rem; }
+.share-row:last-child { margin-bottom: 0; }
+.share-label-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+.share-label {
+    font-family: var(--font-arcade);
+    font-size: 0.55rem;
+    color: var(--neon-yellow);
+}
 .play-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 /* --- Edit page --- */
@@ -367,7 +390,6 @@ main {
     font-size: 0.6rem;
     padding: 0.75rem;
     margin-bottom: 1rem;
-    text-align: center;
     display: none;
 }
 .save-result.success {
@@ -464,5 +486,5 @@ body::after {
     .hero .title { font-size: 1.2rem; }
     .play-controls { flex-direction: column; align-items: stretch; }
     .speed-control { margin-left: 0; justify-content: center; }
-    .share-form .arcade-input { width: 200px; }
+    .share-form .arcade-input { max-width: 100%; }
 }

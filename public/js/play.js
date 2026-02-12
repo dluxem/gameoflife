@@ -30,6 +30,8 @@
 
     document.getElementById('sizeLabel').textContent = data.width + 'x' + data.height;
     document.getElementById('btnEdit').href = 'edit.html#' + encodeURIComponent(hash);
+    document.getElementById('codeBox').value = hash;
+    document.getElementById('urlBox').value = window.location.href;
 
     let running = false;
     let animationId = null;
@@ -98,7 +100,7 @@
     });
 
     document.getElementById('btnCopyCode').addEventListener('click', function () {
-        navigator.clipboard.writeText(hash).then(() => {
+        navigator.clipboard.writeText(document.getElementById('codeBox').value).then(() => {
             const orig = this.textContent;
             this.textContent = 'COPIED!';
             setTimeout(() => { this.textContent = orig; }, 1500);
@@ -106,7 +108,7 @@
     });
 
     document.getElementById('btnCopyUrl').addEventListener('click', function () {
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        navigator.clipboard.writeText(document.getElementById('urlBox').value).then(() => {
             const orig = this.textContent;
             this.textContent = 'COPIED!';
             setTimeout(() => { this.textContent = orig; }, 1500);
