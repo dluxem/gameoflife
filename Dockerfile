@@ -1,12 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY GameOfLife.sln .
+COPY GameOfLife.slnx .
 COPY src/GameOfLife.Web/GameOfLife.Web.csproj src/GameOfLife.Web/
 COPY tests/GameOfLife.Tests/GameOfLife.Tests.csproj tests/GameOfLife.Tests/
 RUN dotnet restore
 
-COPY . .
+COPY src/ src/
+COPY tests/ tests/
 RUN dotnet publish src/GameOfLife.Web/GameOfLife.Web.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
