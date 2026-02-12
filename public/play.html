@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PLAY - GAME OF LIFE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/site.css" />
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="arcade-nav">
+            <a class="nav-logo" href="index.html">GAME OF LIFE</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">HOME</a>
+                <a href="edit.html" class="nav-btn">NEW MAP</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div id="errorView" class="error-screen hidden">
+            <h1 class="glitch" data-text="MAP NOT FOUND">MAP NOT FOUND</h1>
+            <p id="errorMessage">NO MAP CODE PROVIDED</p>
+            <a href="index.html" class="arcade-btn primary">RETURN HOME</a>
+        </div>
+
+        <div id="playView" class="play-container hidden">
+            <div class="play-header">
+                <h1 class="map-title">GAME OF LIFE</h1>
+                <div class="play-info">
+                    <span id="sizeLabel" class="info-badge"></span>
+                </div>
+            </div>
+
+            <div class="play-area">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <div class="play-controls">
+                <button id="btnPlay" class="arcade-btn primary">PLAY</button>
+                <button id="btnStep" class="arcade-btn">STEP</button>
+                <button id="btnReset" class="arcade-btn">RESET</button>
+                <div class="speed-control">
+                    <label for="speed">SPEED:</label>
+                    <input type="range" id="speed" min="1" max="30" value="10" class="arcade-range" />
+                    <span id="speedLabel">10</span>
+                </div>
+                <span class="generation-counter">GEN: <span id="genCount">0</span></span>
+                <span class="population-counter">POP: <span id="popCount">0</span></span>
+            </div>
+
+            <div class="play-actions">
+                <button id="btnCopyCode" class="arcade-btn">COPY CODE</button>
+                <button id="btnCopyUrl" class="arcade-btn">COPY URL</button>
+                <a id="btnEdit" href="edit.html" class="arcade-btn">EDIT / FORK</a>
+            </div>
+        </div>
+    </main>
+    <footer class="arcade-footer">
+        <span class="blink">INSERT COIN</span>
+        <span>&copy; 2026 Doug Luxem</span>
+        <span class="blink">PRESS START</span>
+    </footer>
+    <script src="js/gameoflife.js"></script>
+    <script src="js/codec.js"></script>
+    <script src="js/play.js"></script>
+</body>
+</html>

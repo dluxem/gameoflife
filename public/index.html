@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GAME OF LIFE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/site.css" />
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="arcade-nav">
+            <a class="nav-logo" href="index.html">GAME OF LIFE</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">HOME</a>
+                <a href="edit.html" class="nav-btn">NEW MAP</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="hero">
+            <h1 class="title glitch" data-text="GAME OF LIFE">GAME OF LIFE</h1>
+            <p class="subtitle">CONWAY'S CLASSIC CELLULAR AUTOMATON</p>
+            <div class="hero-actions">
+                <a href="edit.html" class="arcade-btn primary">CREATE NEW MAP</a>
+            </div>
+        </div>
+
+        <div class="share-lookup">
+            <form id="codeForm" class="share-form">
+                <label for="shareCode">ENTER MAP CODE:</label>
+                <input type="text" id="shareCode" name="code"
+                       placeholder="PASTE CODE" class="arcade-input" autocomplete="off" />
+                <button type="submit" class="arcade-btn primary">LOAD</button>
+            </form>
+            <p id="codeError" class="code-error"></p>
+        </div>
+    </main>
+    <footer class="arcade-footer">
+        <span class="blink">INSERT COIN</span>
+        <span>&copy; 2026 Doug Luxem</span>
+        <span class="blink">PRESS START</span>
+    </footer>
+    <script src="js/codec.js"></script>
+    <script>
+        document.getElementById('codeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const code = document.getElementById('shareCode').value.trim();
+            const errEl = document.getElementById('codeError');
+            if (!code) { errEl.textContent = 'ENTER A CODE'; return; }
+            try {
+                MapCodec.decode(code);
+                window.location.href = 'play.html#' + encodeURIComponent(code);
+            } catch (err) {
+                errEl.textContent = 'INVALID CODE: ' + err.message.toUpperCase();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,16 +1,8 @@
 class GameOfLife {
-    constructor(width, height, cellData) {
+    constructor(width, height, grid) {
         this.width = width;
         this.height = height;
-        this.grid = this._createGrid(width, height);
-        if (cellData) {
-            this.loadCellData(cellData);
-        }
-    }
-
-    _createGrid(w, h) {
-        const grid = new Uint8Array(w * h);
-        return grid;
+        this.grid = grid ? new Uint8Array(grid) : new Uint8Array(width * height);
     }
 
     get(x, y) {
@@ -64,15 +56,11 @@ class GameOfLife {
 
     population() {
         let count = 0;
-        for (let i = 0; i < this.grid.length; i++) {
-            count += this.grid[i];
-        }
+        for (let i = 0; i < this.grid.length; i++) count += this.grid[i];
         return count;
     }
 
-    clear() {
-        this.grid.fill(0);
-    }
+    clear() { this.grid.fill(0); }
 
     randomize(density = 0.3) {
         for (let i = 0; i < this.grid.length; i++) {
@@ -86,32 +74,8 @@ class GameOfLife {
         }
     }
 
-    toCellData() {
-        const rows = [];
-        for (let y = 0; y < this.height; y++) {
-            let row = '';
-            for (let x = 0; x < this.width; x++) {
-                row += this.grid[y * this.width + x] ? '1' : '0';
-            }
-            rows.push(row);
-        }
-        return rows.join('\n');
-    }
-
-    loadCellData(data) {
-        if (!data) return;
-        const rows = data.split('\n');
-        for (let y = 0; y < Math.min(rows.length, this.height); y++) {
-            for (let x = 0; x < Math.min(rows[y].length, this.width); x++) {
-                this.grid[y * this.width + x] = rows[y][x] === '1' ? 1 : 0;
-            }
-        }
-    }
-
     clone() {
-        const copy = new GameOfLife(this.width, this.height);
-        copy.grid = new Uint8Array(this.grid);
-        return copy;
+        return new GameOfLife(this.width, this.height, this.grid);
     }
 }
 
@@ -120,7 +84,7 @@ class GameRenderer {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.game = game;
-        this.cellSize = options.cellSize || this._calculateCellSize(options.maxWidth || 800);
+        this.cellSize = options.cellSize || this._calcCellSize(options.maxWidth || 800);
         this.colorAlive = options.colorAlive || '#39ff14';
         this.colorDead = options.colorDead || '#181830';
         this.colorGrid = options.colorGrid || '#222244';
@@ -128,9 +92,8 @@ class GameRenderer {
         this._resize();
     }
 
-    _calculateCellSize(maxWidth) {
-        const size = Math.floor(maxWidth / this.game.width);
-        return Math.max(2, Math.min(size, 20));
+    _calcCellSize(maxWidth) {
+        return Math.max(2, Math.min(Math.floor(maxWidth / this.game.width), 20));
     }
 
     _resize() {
@@ -140,7 +103,6 @@ class GameRenderer {
 
     render() {
         const { ctx, game, cellSize } = this;
-
         ctx.fillStyle = this.colorDead;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -162,15 +124,13 @@ class GameRenderer {
         }
 
         ctx.fillStyle = this.colorAlive;
+        const pad = this.showGrid && cellSize > 3 ? 0.5 : 0;
         for (let y = 0; y < game.height; y++) {
             for (let x = 0; x < game.width; x++) {
                 if (game.get(x, y)) {
-                    const pad = this.showGrid && cellSize > 3 ? 0.5 : 0;
                     ctx.fillRect(
-                        x * cellSize + pad,
-                        y * cellSize + pad,
-                        cellSize - pad * 2,
-                        cellSize - pad * 2
+                        x * cellSize + pad, y * cellSize + pad,
+                        cellSize - pad * 2, cellSize - pad * 2
                     );
                 }
             }
