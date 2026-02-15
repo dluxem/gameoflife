@@ -367,21 +367,54 @@ main {
     white-space: nowrap;
 }
 .edit-toolbar { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.edit-grid-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
 .edit-area {
     background: var(--cell-dead);
     border: 2px solid var(--neon-green);
     box-shadow: 0 0 20px rgba(57, 255, 20, 0.15);
-    margin-bottom: 1rem;
     display: flex;
     justify-content: center;
     overflow: hidden;
     cursor: crosshair;
+    flex: 1;
+    min-width: 0;
 }
 .edit-area canvas {
     display: block;
     max-width: 100%;
     image-rendering: pixelated;
 }
+.edit-rules {
+    width: 190px;
+    flex-shrink: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--text-dim);
+    background: var(--bg-panel);
+}
+.rules-title {
+    font-family: var(--font-arcade);
+    font-size: 0.6rem;
+    color: var(--neon-cyan);
+    margin: 0 0 0.6rem 0;
+}
+.rules-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+.rules-list li {
+    margin-bottom: 0.5rem;
+}
+.rules-list li:last-child { margin-bottom: 0; }
+.rules-list .hl { color: var(--neon-green); }
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
 /* --- Save result --- */
@@ -487,4 +520,6 @@ body::after {
     .play-controls { flex-direction: column; align-items: stretch; }
     .speed-control { margin-left: 0; justify-content: center; }
     .share-form .arcade-input { max-width: 100%; }
+    .edit-grid-row { flex-direction: column; }
+    .edit-rules { width: auto; }
 }
