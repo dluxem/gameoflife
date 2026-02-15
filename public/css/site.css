@@ -203,8 +203,8 @@ main {
     resize: vertical;
     word-break: break-all;
     line-height: 1.4;
-    min-height: 2.4em;
-    max-height: 12em;
+    min-height: 5em;
+    max-height: 16em;
     overflow-y: auto;
 }
 
@@ -422,6 +422,9 @@ main {
 .rules-list .hl { color: var(--neon-green); }
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
+#shareModal .modal-content {
+    width: 900px;
+}
 /* --- Share result (modal content) --- */
 .share-error {
     font-family: var(--font-arcade);
