@@ -27,22 +27,43 @@
     let isDrawing = false;
     let drawValue = null; // 1 = activating, 0 = deactivating (set on mousedown)
 
+    // Playback state
+    let playing = false;
+    let animId = null;
+    let lastStep = 0;
+    let gen = 0;
+    let snapshot = null; // saved grid state for reset
+
+    const btnPlay = document.getElementById('btnPlay');
+    const btnStep = document.getElementById('btnStep');
+    const btnReset = document.getElementById('btnReset');
+    const genCount = document.getElementById('genCount');
+
+    function isEditMode() {
+        return !playing && gen === 0;
+    }
+
+    // --- Edit toolbar ---
     document.getElementById('btnClear').addEventListener('click', () => {
+        if (!isEditMode()) return;
         game.clear();
         renderer.render();
     });
 
     document.getElementById('btnRandom').addEventListener('click', () => {
+        if (!isEditMode()) return;
         game.randomize();
         renderer.render();
     });
 
     document.getElementById('btnInvert').addEventListener('click', () => {
+        if (!isEditMode()) return;
         game.invert();
         renderer.render();
     });
 
     document.getElementById('btnApplySize').addEventListener('click', () => {
+        if (!isEditMode()) return;
         const newW = parseInt(document.getElementById('mapWidth').value, 10);
         const newH = parseInt(document.getElementById('mapHeight').value, 10);
         if (newW >= 3 && newW <= 160 && newH >= 3 && newH <= 160) {
@@ -54,8 +75,9 @@
         }
     });
 
-    // Drawing on canvas — click toggles, drag continues in same mode
+    // --- Drawing on canvas — click toggles, drag continues in same mode ---
     function handleDraw(e) {
+        if (!isEditMode()) return;
         const pos = renderer.getCellAt(e.clientX, e.clientY);
         if (!pos) return;
         game.set(pos.x, pos.y, drawValue);
@@ -63,6 +85,7 @@
     }
 
     canvas.addEventListener('mousedown', (e) => {
+        if (!isEditMode()) return;
         const pos = renderer.getCellAt(e.clientX, e.clientY);
         if (!pos) return;
         drawValue = game.get(pos.x, pos.y) ? 0 : 1;
@@ -74,6 +97,7 @@
     canvas.addEventListener('mouseleave', () => { isDrawing = false; });
 
     canvas.addEventListener('touchstart', (e) => {
+        if (!isEditMode()) return;
         e.preventDefault();
         const fakeEvent = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
         const pos = renderer.getCellAt(fakeEvent.clientX, fakeEvent.clientY);
@@ -88,16 +112,74 @@
     }, { passive: false });
     canvas.addEventListener('touchend', () => { isDrawing = false; });
 
-    // Save
-    document.getElementById('btnSave').addEventListener('click', () => {
+    // --- Playback controls ---
+    function playLoop(timestamp) {
+        if (!playing) return;
+        if (timestamp - lastStep >= 100) {
+            game.step();
+            gen++;
+            genCount.textContent = gen;
+            renderer.render();
+            lastStep = timestamp;
+        }
+        animId = requestAnimationFrame(playLoop);
+    }
+
+    btnPlay.addEventListener('click', () => {
+        if (playing) {
+            // Stop
+            playing = false;
+            if (animId) cancelAnimationFrame(animId);
+            btnPlay.textContent = 'PLAY';
+        } else {
+            // Start playing — snapshot on first play from edit mode
+            if (gen === 0) {
+                snapshot = game.clone();
+            }
+            playing = true;
+            btnPlay.textContent = 'STOP';
+            lastStep = performance.now();
+            animId = requestAnimationFrame(playLoop);
+        }
+    });
+
+    btnStep.addEventListener('click', () => {
+        if (playing) return;
+        if (gen === 0) {
+            snapshot = game.clone();
+        }
+        game.step();
+        gen++;
+        genCount.textContent = gen;
+        renderer.render();
+    });
+
+    btnReset.addEventListener('click', () => {
+        playing = false;
+        if (animId) cancelAnimationFrame(animId);
+        btnPlay.textContent = 'PLAY';
+        if (snapshot) {
+            game = snapshot.clone();
+            renderer = new GameRenderer(canvas, game, { maxWidth: 860 });
+            snapshot = null;
+        }
+        gen = 0;
+        genCount.textContent = '0';
+        renderer.render();
+    });
+
+    // --- Share ---
+    document.getElementById('btnShare').addEventListener('click', () => {
+        // If running or stepped, use the snapshot (original drawing) for sharing
+        const shareGame = snapshot || game;
         const resultEl = document.getElementById('saveResult');
-        if (game.population() === 0) {
+        if (shareGame.population() === 0) {
             resultEl.className = 'save-result error';
             resultEl.textContent = 'DRAW SOME CELLS FIRST';
             return;
         }
 
-        const code = MapCodec.encode(game.width, game.height, game.grid);
+        const code = MapCodec.encode(shareGame.width, shareGame.height, shareGame.grid);
         const url = window.location.origin + '/play.html#' + encodeURIComponent(code);
 
         resultEl.className = 'save-result success';
@@ -126,71 +208,4 @@
         div.textContent = s;
         return div.innerHTML;
     }
-
-    // Preview
-    const previewModal = document.getElementById('previewModal');
-    const previewCanvas = document.getElementById('previewCanvas');
-    let previewGame = null;
-    let previewRenderer = null;
-    let previewRunning = false;
-    let previewAnimId = null;
-    let previewGen = 0;
-    let previewLastStep = 0;
-
-    document.getElementById('btnPreview').addEventListener('click', () => {
-        previewGame = game.clone();
-        previewRenderer = new GameRenderer(previewCanvas, previewGame, { maxWidth: 700 });
-        previewRenderer.render();
-        previewGen = 0;
-        document.getElementById('previewGenCount').textContent = '0';
-        previewRunning = false;
-        document.getElementById('btnPreviewPlay').textContent = 'PLAY';
-        previewModal.classList.remove('hidden');
-    });
-
-    document.getElementById('btnClosePreview').addEventListener('click', () => {
-        previewModal.classList.add('hidden');
-        previewRunning = false;
-        if (previewAnimId) cancelAnimationFrame(previewAnimId);
-    });
-
-    function previewLoop(timestamp) {
-        if (!previewRunning) return;
-        if (timestamp - previewLastStep >= 100) {
-            previewGame.step();
-            previewGen++;
-            document.getElementById('previewGenCount').textContent = previewGen;
-            previewRenderer.render();
-            previewLastStep = timestamp;
-        }
-        previewAnimId = requestAnimationFrame(previewLoop);
-    }
-
-    document.getElementById('btnPreviewPlay').addEventListener('click', () => {
-        previewRunning = !previewRunning;
-        document.getElementById('btnPreviewPlay').textContent = previewRunning ? 'PAUSE' : 'PLAY';
-        if (previewRunning) {
-            previewLastStep = performance.now();
-            previewAnimId = requestAnimationFrame(previewLoop);
-        }
-    });
-
-    document.getElementById('btnPreviewStep').addEventListener('click', () => {
-        if (previewRunning || !previewGame) return;
-        previewGame.step();
-        previewGen++;
-        document.getElementById('previewGenCount').textContent = previewGen;
-        previewRenderer.render();
-    });
-
-    document.getElementById('btnPreviewReset').addEventListener('click', () => {
-        previewRunning = false;
-        if (previewAnimId) cancelAnimationFrame(previewAnimId);
-        document.getElementById('btnPreviewPlay').textContent = 'PLAY';
-        previewGame = game.clone();
-        previewRenderer = new GameRenderer(previewCanvas, previewGame, { maxWidth: 700 });
-        previewRenderer.render();
-        previewGen = 0;
-        document.getElementById('previewGenCount').textContent = '0';
-    });
 })();
