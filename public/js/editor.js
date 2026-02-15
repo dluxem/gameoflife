@@ -24,17 +24,8 @@
     let renderer = new GameRenderer(canvas, game, { maxWidth: 860 });
     renderer.render();
 
-    let currentTool = 'draw';
     let isDrawing = false;
-
-    // Tool buttons
-    document.querySelectorAll('[data-tool]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentTool = btn.dataset.tool;
-            document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
+    let drawValue = null; // 1 = activating, 0 = deactivating (set on mousedown)
 
     document.getElementById('btnClear').addEventListener('click', () => {
         game.clear();
@@ -54,7 +45,7 @@
     document.getElementById('btnApplySize').addEventListener('click', () => {
         const newW = parseInt(document.getElementById('mapWidth').value, 10);
         const newH = parseInt(document.getElementById('mapHeight').value, 10);
-        if (newW >= 3 && newW <= 256 && newH >= 3 && newH <= 256) {
+        if (newW >= 3 && newW <= 160 && newH >= 3 && newH <= 160) {
             width = newW;
             height = newH;
             game = new GameOfLife(width, height);
@@ -63,26 +54,33 @@
         }
     });
 
-    // Drawing on canvas
+    // Drawing on canvas — click toggles, drag continues in same mode
     function handleDraw(e) {
         const pos = renderer.getCellAt(e.clientX, e.clientY);
         if (!pos) return;
-        if (currentTool === 'draw') {
-            game.set(pos.x, pos.y, 1);
-        } else {
-            game.set(pos.x, pos.y, 0);
-        }
+        game.set(pos.x, pos.y, drawValue);
         renderer.render();
     }
 
-    canvas.addEventListener('mousedown', (e) => { isDrawing = true; handleDraw(e); });
+    canvas.addEventListener('mousedown', (e) => {
+        const pos = renderer.getCellAt(e.clientX, e.clientY);
+        if (!pos) return;
+        drawValue = game.get(pos.x, pos.y) ? 0 : 1;
+        isDrawing = true;
+        handleDraw(e);
+    });
     canvas.addEventListener('mousemove', (e) => { if (isDrawing) handleDraw(e); });
     canvas.addEventListener('mouseup', () => { isDrawing = false; });
     canvas.addEventListener('mouseleave', () => { isDrawing = false; });
 
     canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault(); isDrawing = true;
-        handleDraw({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+        e.preventDefault();
+        const fakeEvent = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+        const pos = renderer.getCellAt(fakeEvent.clientX, fakeEvent.clientY);
+        if (!pos) return;
+        drawValue = game.get(pos.x, pos.y) ? 0 : 1;
+        isDrawing = true;
+        handleDraw(fakeEvent);
     }, { passive: false });
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault(); if (!isDrawing) return;
