@@ -25,18 +25,6 @@
                 <h1 class="map-title">NEW MAP</h1>
             </div>
 
-            <div class="edit-settings">
-                <div class="form-row">
-                    <label for="mapWidth">WIDTH:</label>
-                    <input type="number" id="mapWidth" value="30" min="3" max="160" class="arcade-input small" />
-                </div>
-                <div class="form-row">
-                    <label for="mapHeight">HEIGHT:</label>
-                    <input type="number" id="mapHeight" value="30" min="3" max="160" class="arcade-input small" />
-                </div>
-                <button id="btnApplySize" class="arcade-btn">APPLY SIZE</button>
-            </div>
-
             <div class="edit-toolbar">
                 <button id="btnClear" class="arcade-btn">CLEAR</button>
                 <button id="btnRandom" class="arcade-btn">RANDOM</button>
@@ -48,13 +36,27 @@
                 <div class="edit-area">
                     <canvas id="editCanvas"></canvas>
                 </div>
-                <div class="edit-rules">
-                    <h2 class="rules-title">RULES</h2>
-                    <ul class="rules-list">
-                        <li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>
-                        <li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>
-                        <li>All other cells die or stay dead.</li>
-                    </ul>
+                <div class="edit-sidebar">
+                    <div class="edit-settings">
+                        <h2 class="sidebar-title">SIZE</h2>
+                        <div class="form-row">
+                            <label for="mapWidth">W:</label>
+                            <input type="number" id="mapWidth" value="30" min="3" max="160" class="arcade-input small" />
+                        </div>
+                        <div class="form-row">
+                            <label for="mapHeight">H:</label>
+                            <input type="number" id="mapHeight" value="30" min="3" max="160" class="arcade-input small" />
+                        </div>
+                        <button id="btnApplySize" class="arcade-btn small">APPLY</button>
+                    </div>
+                    <div class="edit-rules">
+                        <h2 class="sidebar-title">RULES</h2>
+                        <ul class="rules-list">
+                            <li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>
+                            <li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>
+                            <li>All other cells die or stay dead.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 

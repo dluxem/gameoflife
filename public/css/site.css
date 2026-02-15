@@ -349,16 +349,6 @@ main {
 /* --- Edit page --- */
 .edit-container { max-width: 900px; margin: 0 auto; }
 .edit-header { margin-bottom: 0.5rem; }
-.edit-settings {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    background: var(--bg-panel);
-    border: 1px solid var(--text-dim);
-}
 .form-row { display: flex; align-items: center; gap: 0.4rem; }
 .form-row label {
     font-family: var(--font-arcade);
@@ -389,18 +379,33 @@ main {
     max-width: 100%;
     image-rendering: pixelated;
 }
-.edit-rules {
+.edit-sidebar {
     width: 190px;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.edit-settings {
+    padding: 0.75rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--text-dim);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+.edit-rules {
     padding: 0.75rem;
     border: 1px solid var(--text-dim);
     background: var(--bg-panel);
 }
-.rules-title {
+.sidebar-title {
     font-family: var(--font-arcade);
     font-size: 0.6rem;
     color: var(--neon-cyan);
-    margin: 0 0 0.6rem 0;
+    margin: 0 0 0.5rem 0;
+    width: 100%;
 }
 .rules-list {
     list-style: none;
@@ -521,5 +526,5 @@ body::after {
     .speed-control { margin-left: 0; justify-content: center; }
     .share-form .arcade-input { max-width: 100%; }
     .edit-grid-row { flex-direction: column; }
-    .edit-rules { width: auto; }
+    .edit-sidebar { width: auto; }
 }
