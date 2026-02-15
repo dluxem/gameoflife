@@ -422,25 +422,13 @@ main {
 .rules-list .hl { color: var(--neon-green); }
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
-/* --- Save result --- */
-.save-result {
+/* --- Share result (modal content) --- */
+.share-error {
     font-family: var(--font-arcade);
     font-size: 0.6rem;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    display: none;
-}
-.save-result.success {
-    display: block;
-    color: var(--neon-green);
-    border: 1px solid var(--neon-green);
-    background: rgba(57, 255, 20, 0.05);
-}
-.save-result.error {
-    display: block;
     color: var(--neon-magenta);
-    border: 1px solid var(--neon-magenta);
-    background: rgba(255, 0, 255, 0.05);
+    margin: 0;
+    text-align: center;
 }
 .result-row {
     display: flex;
@@ -448,7 +436,9 @@ main {
     gap: 0.5rem;
     margin-bottom: 0.5rem;
     flex-wrap: wrap;
-    justify-content: center;
+    font-family: var(--font-arcade);
+    font-size: 0.6rem;
+    color: var(--neon-green);
 }
 .result-row:last-child { margin-bottom: 0; }
 

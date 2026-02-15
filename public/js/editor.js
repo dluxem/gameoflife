@@ -168,30 +168,47 @@
         renderer.render();
     });
 
-    // --- Share ---
+    // --- Share modal ---
+    const shareModal = document.getElementById('shareModal');
+    const shareResult = document.getElementById('shareResult');
+
+    function closeShareModal() {
+        shareModal.classList.add('hidden');
+    }
+
+    document.getElementById('btnCloseShare').addEventListener('click', closeShareModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !shareModal.classList.contains('hidden')) {
+            closeShareModal();
+        }
+    });
+
+    shareModal.addEventListener('click', (e) => {
+        if (e.target === shareModal) closeShareModal();
+    });
+
     document.getElementById('btnShare').addEventListener('click', () => {
         // If running or stepped, use the snapshot (original drawing) for sharing
         const shareGame = snapshot || game;
-        const resultEl = document.getElementById('saveResult');
         if (shareGame.population() === 0) {
-            resultEl.className = 'save-result error';
-            resultEl.textContent = 'DRAW SOME CELLS FIRST';
+            shareResult.innerHTML = '<p class="share-error">DRAW SOME CELLS FIRST</p>';
+            shareModal.classList.remove('hidden');
             return;
         }
 
         const code = MapCodec.encode(shareGame.width, shareGame.height, shareGame.grid);
         const url = window.location.origin + '/play.html#' + encodeURIComponent(code);
 
-        resultEl.className = 'save-result success';
-        resultEl.innerHTML =
+        shareResult.innerHTML =
             '<div class="result-row"><span>MAP CODE:</span> ' +
-            '<button class="arcade-btn small copy-btn" data-target="saveCodeBox">COPY</button></div>' +
-            '<textarea id="saveCodeBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(code) + '</textarea>' +
+            '<button class="arcade-btn small copy-btn" data-target="shareCodeBox">COPY</button></div>' +
+            '<textarea id="shareCodeBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(code) + '</textarea>' +
             '<div class="result-row"><span>URL:</span> ' +
-            '<button class="arcade-btn small copy-btn" data-target="saveUrlBox">COPY</button></div>' +
-            '<textarea id="saveUrlBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(url) + '</textarea>';
+            '<button class="arcade-btn small copy-btn" data-target="shareUrlBox">COPY</button></div>' +
+            '<textarea id="shareUrlBox" class="arcade-input code-box" rows="3" readonly>' + escapeHtml(url) + '</textarea>';
 
-        resultEl.querySelectorAll('.copy-btn').forEach(btn => {
+        shareResult.querySelectorAll('.copy-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const target = document.getElementById(btn.dataset.target);
                 navigator.clipboard.writeText(target.value).then(() => {
@@ -201,6 +218,8 @@
                 });
             });
         });
+
+        shareModal.classList.remove('hidden');
     });
 
     function escapeHtml(s) {
