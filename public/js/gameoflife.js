@@ -87,7 +87,7 @@ class GameRenderer {
         this.cellSize = options.cellSize || this._calcCellSize(options.maxWidth || 800);
         this.colorAlive = options.colorAlive || '#39ff14';
         this.colorDead = options.colorDead || '#181830';
-        this.colorGrid = options.colorGrid || '#222244';
+        this.colorGrid = options.colorGrid || '#3a3a5c';
         this.showGrid = options.showGrid !== false;
         this._resize();
     }
