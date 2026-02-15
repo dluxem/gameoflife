@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PLAY - GAME OF LIFE</title>
+    <title>GAME OF LIFE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
@@ -15,27 +15,49 @@
             <a class="nav-logo" href="index.html">GAME OF LIFE</a>
             <div class="nav-links">
                 <a href="index.html" class="nav-btn">HOME</a>
-                <a href="edit.html" class="nav-btn">NEW MAP</a>
+                <a href="play.html" class="nav-btn">NEW MAP</a>
             </div>
         </nav>
     </header>
     <main>
-        <div id="errorView" class="error-screen hidden">
-            <h1 class="glitch" data-text="MAP NOT FOUND">MAP NOT FOUND</h1>
-            <p id="errorMessage">NO MAP CODE PROVIDED</p>
-            <a href="index.html" class="arcade-btn primary">RETURN HOME</a>
-        </div>
-
-        <div id="playView" class="play-container hidden">
-            <div class="play-header">
-                <h1 class="map-title">GAME OF LIFE</h1>
-                <div class="play-info">
-                    <span id="sizeLabel" class="info-badge"></span>
-                </div>
+        <div class="edit-container">
+            <div class="edit-header">
+                <h1 class="map-title">NEW MAP</h1>
             </div>
 
-            <div class="play-area">
-                <canvas id="gameCanvas"></canvas>
+            <div class="edit-toolbar">
+                <button id="btnClear" class="arcade-btn">CLEAR</button>
+                <button id="btnRandom" class="arcade-btn">RANDOM</button>
+                <button id="btnInvert" class="arcade-btn">INVERT</button>
+                <button id="btnShare" class="arcade-btn primary" style="margin-left:auto">SHARE</button>
+            </div>
+
+            <div class="edit-grid-row">
+                <div class="edit-area">
+                    <canvas id="editCanvas"></canvas>
+                </div>
+                <div class="edit-sidebar">
+                    <div class="edit-settings">
+                        <h2 class="sidebar-title">SIZE</h2>
+                        <div class="form-row">
+                            <label for="mapWidth">W:</label>
+                            <input type="number" id="mapWidth" value="30" min="3" max="160" class="arcade-input small" />
+                        </div>
+                        <div class="form-row">
+                            <label for="mapHeight">H:</label>
+                            <input type="number" id="mapHeight" value="30" min="3" max="160" class="arcade-input small" />
+                        </div>
+                        <button id="btnApplySize" class="arcade-btn small">APPLY</button>
+                    </div>
+                    <div class="edit-rules">
+                        <h2 class="sidebar-title">RULES</h2>
+                        <ul class="rules-list">
+                            <li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>
+                            <li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>
+                            <li>All other cells die or stay dead.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div class="play-controls">
@@ -51,25 +73,14 @@
                 <span class="population-counter">POP: <span id="popCount">0</span></span>
             </div>
 
-            <div class="play-share">
-                <div class="share-row">
-                    <div class="share-label-row">
-                        <span class="share-label">MAP CODE:</span>
-                        <button id="btnCopyCode" class="arcade-btn small">COPY</button>
+            <div id="shareModal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>SHARE</h2>
+                        <button id="btnCloseShare" class="arcade-btn small">X</button>
                     </div>
-                    <textarea id="codeBox" class="arcade-input code-box" rows="3" readonly></textarea>
+                    <div id="shareResult"></div>
                 </div>
-                <div class="share-row">
-                    <div class="share-label-row">
-                        <span class="share-label">URL:</span>
-                        <button id="btnCopyUrl" class="arcade-btn small">COPY</button>
-                    </div>
-                    <textarea id="urlBox" class="arcade-input code-box" rows="3" readonly></textarea>
-                </div>
-            </div>
-
-            <div class="play-actions">
-                <a id="btnEdit" href="edit.html" class="arcade-btn">EDIT / FORK</a>
             </div>
         </div>
     </main>

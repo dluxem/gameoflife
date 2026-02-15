@@ -1,5 +1,7 @@
 # Game of Life
 
+A playable version is live at **<https://life.luxem.org>**.
+
 A browser-based [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) simulator with a map editor, shareable map codes, and an 80s arcade aesthetic. The entire application runs client-side — there is no backend or database.
 
 ## Rules
@@ -14,10 +16,9 @@ A browser-based [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s
 | Page | Path | Purpose |
 |------|------|---------|
 | Home | `index.html` | Enter a map code to load, or navigate to the editor |
-| Editor | `edit.html` | Create a new map, draw cells, save to get a shareable code |
-| Player | `play.html#CODE` | Run the simulation for a map code embedded in the URL hash |
+| Editor / Player | `play.html` | Create a new map, draw cells, run the simulation, and share |
 
-Forking a map from the player (`EDIT / FORK` button) opens the editor pre-loaded with that map's grid via `edit.html#CODE`.
+Opening `play.html` without a hash starts a blank 30×30 grid for editing. Opening `play.html#CODE` pre-loads the encoded map so it can be viewed, edited, or played immediately. Share URLs always point to `play.html#CODE`.
 
 ## Map Code Encoding
 
@@ -143,15 +144,13 @@ All application logic (Game of Life engine, codec, editor, player) is vanilla Ja
 ```
 public/
 ├── index.html              Home page
-├── edit.html               Map editor
-├── play.html               Simulation player
+├── play.html               Editor / player (single unified page)
 ├── css/
 │   └── site.css            80s arcade theme
 └── js/
     ├── codec.js            Map code encode/decode (base-62, CRC-8)
     ├── gameoflife.js       Game engine + canvas renderer
-    ├── editor.js           Editor page logic
-    └── play.js             Player page logic
+    └── play.js             Editor + player page logic
 Dockerfile                  nginx:alpine for local testing
 nginx.conf                  nginx config (port 8080)
 docker-compose.yml          Docker Compose wrapper
