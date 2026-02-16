@@ -9,6 +9,7 @@
     --text-dim: #888;
     --cell-alive: #39ff14;
     --cell-dead: #181830;
+    --cell-symbiote: #00e5ff;
     --cell-grid: #3a3a5c;
     --font-arcade: 'Press Start 2P', monospace;
     --font-mono: 'Share Tech Mono', monospace;
@@ -420,6 +421,43 @@ main {
 }
 .rules-list li:last-child { margin-bottom: 0; }
 .rules-list .hl { color: var(--neon-green); }
+/* --- Game mode & cell type selectors --- */
+.mode-selector, .cell-type-selector {
+    display: flex;
+    gap: 0.3rem;
+    width: 100%;
+}
+.mode-btn, .cell-type-btn {
+    flex: 1;
+    text-align: center;
+}
+.mode-btn.active {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+    box-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+}
+.cell-type-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    justify-content: center;
+}
+.cell-type-btn.active {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+    box-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+}
+.type-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+}
+.type-dot.herbivore { background: var(--cell-alive); }
+.type-dot.symbiote { background: var(--cell-symbiote); }
+
+.pop-h { color: var(--cell-alive); }
+.pop-s { color: var(--cell-symbiote); }
+
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
 #shareModal .modal-content {
