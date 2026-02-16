@@ -422,7 +422,13 @@ main {
 .rules-list li:last-child { margin-bottom: 0; }
 .rules-list .hl { color: var(--neon-green); }
 /* --- Game mode & cell type selectors --- */
-.mode-selector, .cell-type-selector {
+.mode-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+}
+.cell-type-selector {
     display: flex;
     gap: 0.3rem;
     width: 100%;
