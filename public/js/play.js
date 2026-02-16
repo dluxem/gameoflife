@@ -137,7 +137,7 @@
                 '<li>Survives with <span class="hl">2-3</span> neighbors, or <span class="hl">1-3</span> if symbiote adjacent.</li>' +
                 '<li>Born with exactly <span class="hl">3</span> herbivore neighbors.</li>' +
                 '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span></li>' +
-                '<li>Survives with herbivore host and fewer than <span class="hl">4</span> symbiote neighbors.</li>' +
+                '<li>Survives with at least <span class="hl">1</span> herbivore neighbor.</li>' +
                 '<li>Born with <span class="hl">2</span> symbiote neighbors + herbivore host.</li>' +
                 '</ul>';
         } else {

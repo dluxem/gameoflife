@@ -104,8 +104,8 @@ class GameOfLife {
                         next[y * this.width + x] = CELL_HERBIVORE;
                     }
                 } else if (cell === CELL_SYMBIOTE) {
-                    // Survives with at least 1 herbivore neighbor and fewer than 4 symbiote neighbors
-                    if (n.herbivore >= 1 && n.symbiote < 4) {
+                    // Survives with at least 1 herbivore neighbor
+                    if (n.herbivore >= 1) {
                         next[y * this.width + x] = CELL_SYMBIOTE;
                     }
                 } else {
