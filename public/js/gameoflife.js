@@ -97,10 +97,10 @@ class GameOfLife {
                 const n = this.countNeighborsByType(x, y);
 
                 if (cell === CELL_HERBIVORE) {
-                    // Survives with 2-3 neighbors (any living type)
-                    // OR 1-3 neighbors if at least one symbiote neighbor
+                    // Survives with 2-3 herbivore neighbors, or 1-3 if symbiote adjacent
+                    // Symbiotes don't count toward overpopulation
                     const minSurvive = n.symbiote > 0 ? 1 : 2;
-                    if (n.total >= minSurvive && n.total <= 3) {
+                    if (n.herbivore >= minSurvive && n.herbivore <= 3) {
                         next[y * this.width + x] = CELL_HERBIVORE;
                     }
                 } else if (cell === CELL_SYMBIOTE) {
