@@ -114,8 +114,8 @@ class GameOfLife {
                     if (n.herbivore === 3) {
                         next[y * this.width + x] = CELL_HERBIVORE;
                     }
-                    // Symbiote born: exactly 2 symbiote neighbors + at least 1 herbivore neighbor
-                    else if (n.symbiote === 2 && n.herbivore >= 1) {
+                    // Symbiote born: 1-2 symbiote neighbors + at least 1 herbivore neighbor
+                    else if (n.symbiote >= 1 && n.symbiote <= 2 && n.herbivore >= 1) {
                         next[y * this.width + x] = CELL_SYMBIOTE;
                     }
                 }

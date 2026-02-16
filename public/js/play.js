@@ -138,7 +138,7 @@
                 '<li>Born with exactly <span class="hl">3</span> herbivore neighbors.</li>' +
                 '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span></li>' +
                 '<li>Survives with at least <span class="hl">1</span> herbivore neighbor.</li>' +
-                '<li>Born with <span class="hl">2</span> symbiote neighbors + herbivore host.</li>' +
+                '<li>Born with <span class="hl">1-2</span> symbiote neighbors + herbivore host.</li>' +
                 '</ul>';
         } else {
             rulesContent.innerHTML =
