@@ -8,11 +8,28 @@ const GAME_MODE_CLASSIC = 0;
 const GAME_MODE_SYMBIOTIC = 1;
 
 class GameOfLife {
+    static defaultRules() {
+        return {
+            herbSurviveMin: 2,
+            herbSurviveMax: 3,
+            herbSurviveMinWithSymb: 1,
+            herbBirthMin: 3,
+            herbBirthMax: 3,
+            symbSurviveMinHerb: 1,
+            symbSurviveMaxHerb: 8,
+            symbBirthMinSymb: 1,
+            symbBirthMaxSymb: 2,
+            symbBirthMinHerb: 1,
+            symbOvercrowdsHerb: false,
+        };
+    }
+
     constructor(width, height, grid, gameMode = GAME_MODE_CLASSIC) {
         this.width = width;
         this.height = height;
         this.grid = grid ? new Uint8Array(grid) : new Uint8Array(width * height);
         this.gameMode = gameMode;
+        this.rules = GameOfLife.defaultRules();
     }
 
     get(x, y) {
@@ -91,31 +108,27 @@ class GameOfLife {
 
     _stepSymbiotic() {
         const next = new Uint8Array(this.width * this.height);
+        const r = this.rules;
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const cell = this.grid[y * this.width + x];
                 const n = this.countNeighborsByType(x, y);
+                const crowdCount = r.symbOvercrowdsHerb ? n.total : n.herbivore;
 
                 if (cell === CELL_HERBIVORE) {
-                    // Survives with 2-3 herbivore neighbors, or 1-3 if symbiote adjacent
-                    // Symbiotes don't count toward overpopulation
-                    const minSurvive = n.symbiote > 0 ? 1 : 2;
-                    if (n.herbivore >= minSurvive && n.herbivore <= 3) {
+                    const minSurvive = n.symbiote > 0 ? r.herbSurviveMinWithSymb : r.herbSurviveMin;
+                    if (crowdCount >= minSurvive && crowdCount <= r.herbSurviveMax) {
                         next[y * this.width + x] = CELL_HERBIVORE;
                     }
                 } else if (cell === CELL_SYMBIOTE) {
-                    // Survives with at least 1 herbivore neighbor
-                    if (n.herbivore >= 1) {
+                    if (n.herbivore >= r.symbSurviveMinHerb && n.herbivore <= r.symbSurviveMaxHerb) {
                         next[y * this.width + x] = CELL_SYMBIOTE;
                     }
                 } else {
-                    // Dead cell — check for birth
-                    // Herbivore born: exactly 3 herbivore neighbors
-                    if (n.herbivore === 3) {
+                    if (n.herbivore >= r.herbBirthMin && n.herbivore <= r.herbBirthMax) {
                         next[y * this.width + x] = CELL_HERBIVORE;
-                    }
-                    // Symbiote born: 1-2 symbiote neighbors + at least 1 herbivore neighbor
-                    else if (n.symbiote >= 1 && n.symbiote <= 2 && n.herbivore >= 1) {
+                    } else if (n.symbiote >= r.symbBirthMinSymb && n.symbiote <= r.symbBirthMaxSymb
+                               && n.herbivore >= r.symbBirthMinHerb) {
                         next[y * this.width + x] = CELL_SYMBIOTE;
                     }
                 }
@@ -187,6 +200,7 @@ class GameOfLife {
 
     clone() {
         const c = new GameOfLife(this.width, this.height, this.grid, this.gameMode);
+        c.rules = Object.assign({}, this.rules);
         return c;
     }
 }

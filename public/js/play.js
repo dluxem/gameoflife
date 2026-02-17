@@ -129,17 +129,32 @@
     });
 
     // --- Rules display ---
+    const btnTweakRules = document.getElementById('btnTweakRules');
+
+    function rangeText(min, max) {
+        return min === max ? String(min) : min + '-' + max;
+    }
+
     function updateRulesDisplay() {
         if (gameMode === GAME_MODE_SYMBIOTIC) {
+            const r = game.rules;
+            const survRange = rangeText(r.herbSurviveMin, r.herbSurviveMax);
+            const survSymbRange = rangeText(r.herbSurviveMinWithSymb, r.herbSurviveMax);
+            const birthRange = rangeText(r.herbBirthMin, r.herbBirthMax);
+            const symbSurvRange = r.symbSurviveMaxHerb >= 8
+                ? r.symbSurviveMinHerb + '+'
+                : rangeText(r.symbSurviveMinHerb, r.symbSurviveMaxHerb);
+            const symbBirthRange = rangeText(r.symbBirthMinSymb, r.symbBirthMaxSymb);
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
                 '<li><span class="hl" style="color:var(--cell-alive)">HERBIVORE</span></li>' +
-                '<li>Survives with <span class="hl">2-3</span> neighbors, or <span class="hl">1-3</span> if symbiote adjacent.</li>' +
-                '<li>Born with exactly <span class="hl">3</span> herbivore neighbors.</li>' +
+                '<li>Survives with <span class="hl">' + survRange + '</span> neighbors, or <span class="hl">' + survSymbRange + '</span> if symbiote adjacent.</li>' +
+                '<li>Born with <span class="hl">' + birthRange + '</span> herbivore neighbors.</li>' +
                 '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span></li>' +
-                '<li>Survives with at least <span class="hl">1</span> herbivore neighbor.</li>' +
-                '<li>Born with <span class="hl">1-2</span> symbiote neighbors + herbivore host.</li>' +
+                '<li>Survives with <span class="hl">' + symbSurvRange + '</span> herbivore neighbors.</li>' +
+                '<li>Born with <span class="hl">' + symbBirthRange + '</span> symbiote neighbors + <span class="hl">' + r.symbBirthMinHerb + '+</span> herbivore host.</li>' +
                 '</ul>';
+            btnTweakRules.classList.remove('hidden');
         } else {
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
@@ -147,6 +162,7 @@
                 '<li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>' +
                 '<li>All other cells die or stay dead.</li>' +
                 '</ul>';
+            btnTweakRules.classList.add('hidden');
         }
     }
 
@@ -356,6 +372,79 @@
         div.textContent = s;
         return div.innerHTML;
     }
+
+    // --- Rules tweaker modal ---
+    const tweakerModal = document.getElementById('rulesTweakerModal');
+    const tweakerToggle = document.getElementById('rSymbCrowds');
+
+    // Input element references
+    const tweakerInputs = {
+        herbSurviveMin:      document.getElementById('rHerbSurvMin'),
+        herbSurviveMax:      document.getElementById('rHerbSurvMax'),
+        herbSurviveMinWithSymb: document.getElementById('rHerbSurvSymb'),
+        herbBirthMin:        document.getElementById('rHerbBirthMin'),
+        herbBirthMax:        document.getElementById('rHerbBirthMax'),
+        symbSurviveMinHerb:  document.getElementById('rSymbSurvMinH'),
+        symbSurviveMaxHerb:  document.getElementById('rSymbSurvMaxH'),
+        symbBirthMinSymb:    document.getElementById('rSymbBirthMinS'),
+        symbBirthMaxSymb:    document.getElementById('rSymbBirthMaxS'),
+        symbBirthMinHerb:    document.getElementById('rSymbBirthMinH'),
+    };
+
+    let tweakerCrowdValue = false;
+
+    function populateTweaker(rules) {
+        for (const key in tweakerInputs) {
+            tweakerInputs[key].value = rules[key];
+        }
+        tweakerCrowdValue = rules.symbOvercrowdsHerb;
+        tweakerToggle.textContent = tweakerCrowdValue ? 'YES' : 'NO';
+        tweakerToggle.classList.toggle('on', tweakerCrowdValue);
+    }
+
+    function readTweaker() {
+        const rules = {};
+        for (const key in tweakerInputs) {
+            rules[key] = parseInt(tweakerInputs[key].value, 10) || 0;
+        }
+        rules.symbOvercrowdsHerb = tweakerCrowdValue;
+        return rules;
+    }
+
+    function openTweaker() {
+        populateTweaker(game.rules);
+        tweakerModal.classList.remove('hidden');
+    }
+
+    function closeTweaker() {
+        tweakerModal.classList.add('hidden');
+    }
+
+    btnTweakRules.addEventListener('click', openTweaker);
+    document.getElementById('btnCloseTweaker').addEventListener('click', closeTweaker);
+    tweakerModal.addEventListener('click', (e) => { if (e.target === tweakerModal) closeTweaker(); });
+
+    tweakerToggle.addEventListener('click', () => {
+        tweakerCrowdValue = !tweakerCrowdValue;
+        tweakerToggle.textContent = tweakerCrowdValue ? 'YES' : 'NO';
+        tweakerToggle.classList.toggle('on', tweakerCrowdValue);
+    });
+
+    document.getElementById('btnApplyRules').addEventListener('click', () => {
+        game.rules = readTweaker();
+        updateRulesDisplay();
+        closeTweaker();
+    });
+
+    document.getElementById('btnResetRules').addEventListener('click', () => {
+        populateTweaker(GameOfLife.defaultRules());
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !tweakerModal.classList.contains('hidden')) {
+            closeTweaker();
+        }
+    });
 
     // --- Initialize UI state from loaded game mode ---
     setGameMode(gameMode, true);
