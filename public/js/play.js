@@ -97,6 +97,9 @@
         // Show/hide invert button (not useful in symbiotic mode)
         if (btnInvert) btnInvert.classList.toggle('hidden', gameMode === GAME_MODE_SYMBIOTIC);
 
+        // Show/hide TWEAK button (only available in symbiotic mode)
+        if (btnTweakRules) btnTweakRules.classList.toggle('hidden', gameMode !== GAME_MODE_SYMBIOTIC);
+
         // Reset draw type to herbivore
         drawCellType = CELL_HERBIVORE;
         updateCellTypeBtns();
@@ -154,7 +157,6 @@
                 '<li>Survives with <span class="hl">' + symbSurvRange + '</span> herbivore neighbors.</li>' +
                 '<li>Born with <span class="hl">' + symbBirthRange + '</span> symbiote neighbors + <span class="hl">' + r.symbBirthMinHerb + '+</span> herbivore host.</li>' +
                 '</ul>';
-            btnTweakRules.classList.remove('hidden');
         } else {
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
@@ -162,7 +164,6 @@
                 '<li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>' +
                 '<li>All other cells die or stay dead.</li>' +
                 '</ul>';
-            btnTweakRules.classList.add('hidden');
         }
     }
 
