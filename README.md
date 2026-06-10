@@ -17,17 +17,29 @@ Standard Conway's Game of Life:
 
 ### Symbiotic
 
-Introduces two cell types — **herbivores** (green) and **symbiotes** (blue) — with a mutualistic relationship. Herbivores are the ecosystem foundation; symbiotes depend on them and enhance their survival.
+Introduces two cell types — **herbivores** (green) and **symbiotes** (blue) — locked in a **host/parasite** relationship. "Symbiote" here means a parasite (parasitism is a form of symbiosis): the blue cells hunt and consume the green ones.
 
-#### Herbivore Rules (green)
-- **Survives** with 2–3 neighbors (any living type), OR 1–3 neighbors if at least one neighbor is a symbiote.
-- **Born** in an empty cell with exactly 3 herbivore neighbors.
-- **Dies** otherwise (underpopulation/overpopulation).
+Unlike a mutualism — which is *stabilizing* and tends to settle into still-lifes just like plain Conway — this coupling is deliberately **unstable**, and that is what makes it interesting. The two species form a predator/prey system that behaves like an [excitable medium](https://en.wikipedia.org/wiki/Excitable_medium): herbivores spread as a renewable tissue, symbiotes sweep through them as **infection waves**, and the bare ground left behind regrows. The result is perpetual motion — travelling fronts, spirals, and boom/bust population cycles — instead of a frozen board.
 
-#### Symbiote Rules (blue)
-- **Survives** with 1–2 symbiote neighbors AND at least 1 adjacent herbivore.
-- **Born** in an empty cell with exactly 2 symbiote neighbors AND at least 1 adjacent herbivore.
-- **Dies** without an adjacent herbivore host, or with 0 or 3+ symbiote neighbors.
+The interaction runs in **both directions**, which the old mutualistic rules lacked:
+
+- Herbivores feed the symbiotes (and are killed by them).
+- Symbiotes thin the herbivores, opening space the herbivores then recolonize.
+
+#### Herbivore Rules (green) — the prey
+
+- **Spreads** into bare ground with **2–8** herbivore neighbors (a fast-regrowing tissue, so the gaps the parasite carves are quickly refilled).
+- **Survives** with **2–8** herbivore neighbors.
+- **Is consumed** — converted into a symbiote — when touched by **3 or more** symbiotes (see Predation).
+
+#### Symbiote Rules (blue) — the parasite
+
+- **Infects:** any herbivore with **3+** symbiote neighbors becomes a symbiote next tick (prey biomass is turned into more parasites — this is how blue advances through green).
+- **Spreads** to bare ground with **2–3** symbiote neighbors *and* at least **1** adjacent herbivore host.
+- **Starves** (dies) with no adjacent herbivore — so once a region is eaten out, the parasite dies back, leaving bare ground for the herbivores to reclaim.
+- **Overcrowds** (dies) with **4+** symbiote neighbors — so the parasite can never solidify into a static block; its fronts stay thin and keep moving toward fresh prey.
+
+All of these thresholds are adjustable live in the editor via the **TWEAK** button (the Rules Tweaker), so you can push the system toward herbivore blooms, parasite plagues, or a balanced standoff.
 
 ## Pages
 

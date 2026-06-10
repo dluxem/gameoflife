@@ -67,17 +67,31 @@ GAME_MODE_HERBIVORE = 1
 
 ---
 
-## 3. Game Rules (Herbivore Mode)
+## 3. Game Rules (Symbiotic Mode)
 
-### Herbivore (value 1, green)
-- **Survives** with 2–3 neighbors (any living type counts), OR 1–3 neighbors if at least one neighbor is a symbiote
-- **Born** in an empty cell with exactly 3 herbivore neighbors
-- **Dies** otherwise (underpopulation/overpopulation)
+The original mutualistic rules were replaced because they were *stabilizing*: the
+herbivore layer was essentially untouched Conway and settled into the usual
+still-lifes, while symbiotes were inert followers. The redesign makes the two
+species a **host/parasite (predator/prey) excitable medium** with two-way
+feedback, which sustains travelling waves and population cycles instead of
+freezing. All thresholds below are the tunable defaults (`GameOfLife.defaultRules`).
 
-### Symbiote (value 2, blue)
-- **Survives** with 1–2 symbiote neighbors AND at least 1 herbivore neighbor
-- **Born** in an empty cell with exactly 2 symbiote neighbors AND at least 1 herbivore neighbor
-- **Dies** without an adjacent herbivore, or with 0 or 3+ symbiote neighbors
+### Herbivore (value 1, green) — prey / spreading tissue
+- **Spreads** into an empty cell with 2–8 herbivore neighbors (`herbBirthMin`/`herbBirthMax`)
+- **Survives** with 2–8 herbivore neighbors (`herbSurviveMin`/`herbSurviveMax`)
+- **Is consumed** (becomes a symbiote) when it has ≥ `infectMin` (3) symbiote neighbors
+
+### Symbiote (value 2, blue) — parasite / predator
+- **Infects:** converts an adjacent herbivore once that herbivore has ≥ `infectMin` symbiote neighbors
+- **Spreads** to an empty cell with `symbBirthMinSymb`–`symbBirthMaxSymb` (2–3) symbiote
+  neighbors AND ≥ `symbBirthMinHerb` (1) herbivore host
+- **Starves** (dies) below `symbStarveMinHerb` (1) herbivore neighbors
+- **Overcrowds** (dies) at ≥ `symbOvercrowdMax` (4) symbiote neighbors
+
+The two key invariants that keep it lively: herbivores regrow fast enough to keep
+refilling the bare ground (renewable prey), and symbiotes *must* keep moving
+toward fresh prey because they starve where they've eaten and die where they pack
+together.
 
 ### Classic Mode (unchanged)
 Standard Conway rules. Grid values are only 0 and 1.

@@ -10,17 +10,30 @@ const GAME_MODE_SYMBIOTIC = 1;
 class GameOfLife {
     static defaultRules() {
         return {
-            herbSurviveMin: 2,
-            herbSurviveMax: 3,
-            herbSurviveMinWithSymb: 1,
-            herbBirthMin: 3,
-            herbBirthMax: 3,
-            symbSurviveMinHerb: 1,
-            symbSurviveMaxHerb: 8,
-            symbBirthMinSymb: 1,
-            symbBirthMaxSymb: 2,
-            symbBirthMinHerb: 1,
-            symbOvercrowdsHerb: false,
+            /*
+             * Herbivore (green) — the prey, modelled as a space-filling "tissue".
+             * It readily regrows into bare ground (low birth threshold, wide
+             * survival range), so the gaps the parasite carves get refilled. That
+             * constant supply of fresh prey is what keeps the predator/prey waves
+             * from starving out and freezing the way strict Conway does.
+             */
+            herbBirthMin: 2,        // empty cell becomes herbivore with this many...
+            herbBirthMax: 8,        // ...to this many herbivore neighbors
+            herbSurviveMin: 2,      // herbivore survives with this many...
+            herbSurviveMax: 8,      // ...to this many herbivore neighbors
+
+            /* Predation — symbiotes infect herbivores and convert them. */
+            infectMin: 3,           // a herbivore with >= this many symbiote neighbors
+                                    // is consumed and becomes a symbiote next tick
+
+            /* Symbiote (blue) — the parasite. Cannot live without hosts. */
+            symbStarveMinHerb: 1,   // symbiote starves (dies) below this many
+                                    // herbivore neighbors
+            symbOvercrowdMax: 4,    // symbiote dies of competition with this many or more
+                                    // symbiote neighbors (keeps fronts thin and moving)
+            symbBirthMinSymb: 2,    // empty cell becomes symbiote with this many...
+            symbBirthMaxSymb: 3,    // ...to this many symbiote neighbors,
+            symbBirthMinHerb: 1,    // ...and at least this many herbivore neighbors (food)
         };
     }
 
@@ -106,30 +119,47 @@ class GameOfLife {
         this.grid = next;
     }
 
+    /*
+     * Symbiotic mode is a predator/prey (host/parasite) system, not a mutualism.
+     * The coupling runs in both directions and is deliberately unstable, which is
+     * what produces travelling fronts and boom/bust cycles instead of the static
+     * still-lifes that mutualism (or plain Conway) settles into:
+     *
+     *   - Herbivores (green) grow into empty space by Conway's rules.
+     *   - Symbiotes (blue) cannot reproduce on their own; they spread by INFECTING
+     *     adjacent herbivores, converting prey biomass into more parasites.
+     *   - A symbiote with no herbivore neighbour STARVES, so the parasite dies back
+     *     once it has eaten out a region, leaving bare space the herbivores regrow
+     *     into. That susceptible -> infected -> empty -> regrown loop is an excitable
+     *     medium: it sustains spiral/ring waves rather than freezing.
+     *   - Symbiotes also die when packed too tightly, so they can never settle into a
+     *     solid sterile block; the parasite is forced to keep moving toward fresh prey.
+     */
     _stepSymbiotic() {
         const next = new Uint8Array(this.width * this.height);
         const r = this.rules;
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                const cell = this.grid[y * this.width + x];
+                const idx = y * this.width + x;
+                const cell = this.grid[idx];
                 const n = this.countNeighborsByType(x, y);
-                const crowdCount = r.symbOvercrowdsHerb ? n.total : n.herbivore;
 
                 if (cell === CELL_HERBIVORE) {
-                    const minSurvive = n.symbiote > 0 ? r.herbSurviveMinWithSymb : r.herbSurviveMin;
-                    if (crowdCount >= minSurvive && crowdCount <= r.herbSurviveMax) {
-                        next[y * this.width + x] = CELL_HERBIVORE;
-                    }
+                    if (n.symbiote >= r.infectMin) {
+                        next[idx] = CELL_SYMBIOTE;            // consumed by the parasite
+                    } else if (n.herbivore >= r.herbSurviveMin && n.herbivore <= r.herbSurviveMax) {
+                        next[idx] = CELL_HERBIVORE;           // Conway survival
+                    }                                         // else: dies of over/under-population
                 } else if (cell === CELL_SYMBIOTE) {
-                    if (n.herbivore >= r.symbSurviveMinHerb && n.herbivore <= r.symbSurviveMaxHerb) {
-                        next[y * this.width + x] = CELL_SYMBIOTE;
-                    }
+                    if (n.herbivore >= r.symbStarveMinHerb && n.symbiote < r.symbOvercrowdMax) {
+                        next[idx] = CELL_SYMBIOTE;            // fed and uncrowded -> persists
+                    }                                         // else: starves or overcrowds
                 } else {
                     if (n.herbivore >= r.herbBirthMin && n.herbivore <= r.herbBirthMax) {
-                        next[y * this.width + x] = CELL_HERBIVORE;
+                        next[idx] = CELL_HERBIVORE;           // prey colonises empty space first
                     } else if (n.symbiote >= r.symbBirthMinSymb && n.symbiote <= r.symbBirthMaxSymb
                                && n.herbivore >= r.symbBirthMinHerb) {
-                        next[y * this.width + x] = CELL_SYMBIOTE;
+                        next[idx] = CELL_SYMBIOTE;            // parasite seeds next to a host
                     }
                 }
             }
@@ -167,27 +197,21 @@ class GameOfLife {
     }
 
     _randomizeSymbiotic() {
-        // Place herbivores at ~25% density
+        // A field of herbivores (prey) at moderate density...
         for (let i = 0; i < this.grid.length; i++) {
-            this.grid[i] = Math.random() < 0.25 ? CELL_HERBIVORE : CELL_DEAD;
+            this.grid[i] = Math.random() < 0.34 ? CELL_HERBIVORE : CELL_DEAD;
         }
-        // Place symbiotes at ~8% density, only adjacent to herbivores
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                if (this.grid[y * this.width + x] !== CELL_DEAD) continue;
-                if (Math.random() >= 0.08) continue;
-                // Check if any neighbor is a herbivore
-                let hasHost = false;
-                for (let dy = -1; dy <= 1 && !hasHost; dy++) {
-                    for (let dx = -1; dx <= 1 && !hasHost; dx++) {
-                        if (dx === 0 && dy === 0) continue;
-                        const nx = x + dx, ny = y + dy;
-                        if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                            if (this.grid[ny * this.width + nx] === CELL_HERBIVORE) hasHost = true;
-                        }
-                    }
+        // ...plus a handful of small symbiote "infection foci". Each focus is a 2x2
+        // cluster so the parasites already meet their birth/infection thresholds and
+        // start a spreading wave, instead of sitting inert as isolated dots.
+        const foci = Math.max(3, Math.round((this.width * this.height) / 400));
+        for (let f = 0; f < foci; f++) {
+            const cx = Math.floor(Math.random() * (this.width - 1));
+            const cy = Math.floor(Math.random() * (this.height - 1));
+            for (let dy = 0; dy <= 1; dy++) {
+                for (let dx = 0; dx <= 1; dx++) {
+                    this.set(cx + dx, cy + dy, CELL_SYMBIOTE);
                 }
-                if (hasHost) this.grid[y * this.width + x] = CELL_SYMBIOTE;
             }
         }
     }
