@@ -48,7 +48,7 @@ All of these thresholds are adjustable live in the editor via the **TWEAK** butt
 | Home | `index.html` | Enter a map code to load, or navigate to the editor |
 | Editor / Player | `play.html` | Create a new map, draw cells, run the simulation, and share |
 
-Opening `play.html` without a hash starts a blank 30×30 grid in Classic mode for editing. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
+Opening `play.html` without a hash starts in Symbiotic mode with a ready-made "interesting" board — two counter-rotating waves on a 50×34 grid that bloom into the host/parasite ecosystem as soon as you press **PLAY**. Press **CLEAR** to empty the board and start from scratch. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
 
 ## Map Code Encoding
 

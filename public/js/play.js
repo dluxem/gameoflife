@@ -19,7 +19,15 @@
             game = new GameOfLife(width, height, undefined, gameMode);
         }
     } else {
+        // Fresh visit: open in Symbiotic mode with an interesting live pattern so
+        // the ecosystem is one PLAY away. CLEAR empties the board to start fresh.
+        width = 50;
+        height = 34;
+        gameMode = GAME_MODE_SYMBIOTIC;
         game = new GameOfLife(width, height, undefined, gameMode);
+        game.seedShowcase();
+        document.getElementById('mapWidth').value = width;
+        document.getElementById('mapHeight').value = height;
     }
 
     const canvas = document.getElementById('editCanvas');
