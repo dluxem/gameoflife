@@ -100,30 +100,22 @@
                         <fieldset class="tweaker-section">
                             <legend class="tweaker-legend herb-color">HERBIVORE</legend>
                             <div class="tweaker-group">
+                                <label class="tweaker-label">SPREAD</label>
+                                <div class="tweaker-row">
+                                    <span class="tweaker-hint">min</span>
+                                    <input type="number" id="rHerbBirthMin" class="arcade-input tweaker-num" min="0" max="8" value="2" />
+                                    <span class="tweaker-hint">to</span>
+                                    <input type="number" id="rHerbBirthMax" class="arcade-input tweaker-num" min="0" max="8" value="8" />
+                                    <span class="tweaker-hint">herb neighbors</span>
+                                </div>
+                            </div>
+                            <div class="tweaker-group">
                                 <label class="tweaker-label">SURVIVE</label>
                                 <div class="tweaker-row">
                                     <span class="tweaker-hint">min</span>
                                     <input type="number" id="rHerbSurvMin" class="arcade-input tweaker-num" min="0" max="8" value="2" />
                                     <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rHerbSurvMax" class="arcade-input tweaker-num" min="0" max="8" value="3" />
-                                    <span class="tweaker-hint">neighbors</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">SURVIVE W/ SYMBIOTE</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rHerbSurvSymb" class="arcade-input tweaker-num" min="0" max="8" value="1" />
-                                    <span class="tweaker-hint">neighbors</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">BIRTH</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rHerbBirthMin" class="arcade-input tweaker-num" min="0" max="8" value="3" />
-                                    <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rHerbBirthMax" class="arcade-input tweaker-num" min="0" max="8" value="3" />
+                                    <input type="number" id="rHerbSurvMax" class="arcade-input tweaker-num" min="0" max="8" value="8" />
                                     <span class="tweaker-hint">herb neighbors</span>
                                 </div>
                             </div>
@@ -131,37 +123,42 @@
                         <fieldset class="tweaker-section">
                             <legend class="tweaker-legend symb-color">SYMBIOTE</legend>
                             <div class="tweaker-group">
-                                <label class="tweaker-label">SURVIVE</label>
+                                <label class="tweaker-label">SPREAD</label>
                                 <div class="tweaker-row">
                                     <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rSymbSurvMinH" class="arcade-input tweaker-num" min="0" max="8" value="1" />
+                                    <input type="number" id="rSymbBirthMinS" class="arcade-input tweaker-num" min="0" max="8" value="2" />
                                     <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rSymbSurvMaxH" class="arcade-input tweaker-num" min="0" max="8" value="8" />
-                                    <span class="tweaker-hint">herb neighbors</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">BIRTH</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rSymbBirthMinS" class="arcade-input tweaker-num" min="0" max="8" value="1" />
-                                    <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rSymbBirthMaxS" class="arcade-input tweaker-num" min="0" max="8" value="2" />
+                                    <input type="number" id="rSymbBirthMaxS" class="arcade-input tweaker-num" min="0" max="8" value="3" />
                                     <span class="tweaker-hint">symb neighbors</span>
                                 </div>
                                 <div class="tweaker-row">
                                     <span class="tweaker-hint">+ min</span>
                                     <input type="number" id="rSymbBirthMinH" class="arcade-input tweaker-num" min="0" max="8" value="1" />
+                                    <span class="tweaker-hint">herb host</span>
+                                </div>
+                            </div>
+                            <div class="tweaker-group">
+                                <label class="tweaker-label">STARVES BELOW</label>
+                                <div class="tweaker-row">
+                                    <input type="number" id="rSymbStarveH" class="arcade-input tweaker-num" min="0" max="8" value="1" />
                                     <span class="tweaker-hint">herb neighbors</span>
+                                </div>
+                            </div>
+                            <div class="tweaker-group">
+                                <label class="tweaker-label">OVERCROWDS AT</label>
+                                <div class="tweaker-row">
+                                    <input type="number" id="rSymbCrowdMax" class="arcade-input tweaker-num" min="1" max="8" value="4" />
+                                    <span class="tweaker-hint">symb neighbors</span>
                                 </div>
                             </div>
                         </fieldset>
                         <fieldset class="tweaker-section">
-                            <legend class="tweaker-legend interact-color">INTERACTION</legend>
+                            <legend class="tweaker-legend interact-color">PREDATION</legend>
                             <div class="tweaker-group">
-                                <label class="tweaker-label">SYMBIOTES CROWD HERBIVORES</label>
+                                <label class="tweaker-label">HERBIVORE INFECTED AT</label>
                                 <div class="tweaker-row">
-                                    <button id="rSymbCrowds" class="arcade-btn small tweaker-toggle">NO</button>
+                                    <input type="number" id="rInfectMin" class="arcade-input tweaker-num" min="1" max="8" value="3" />
+                                    <span class="tweaker-hint">symb neighbors</span>
                                 </div>
                             </div>
                         </fieldset>

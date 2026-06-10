@@ -19,7 +19,15 @@
             game = new GameOfLife(width, height, undefined, gameMode);
         }
     } else {
+        // Fresh visit: open in Symbiotic mode with an interesting live pattern so
+        // the ecosystem is one PLAY away. CLEAR empties the board to start fresh.
+        width = 50;
+        height = 34;
+        gameMode = GAME_MODE_SYMBIOTIC;
         game = new GameOfLife(width, height, undefined, gameMode);
+        game.seedShowcase();
+        document.getElementById('mapWidth').value = width;
+        document.getElementById('mapHeight').value = height;
     }
 
     const canvas = document.getElementById('editCanvas');
@@ -138,21 +146,17 @@
     function updateRulesDisplay() {
         if (gameMode === GAME_MODE_SYMBIOTIC) {
             const r = game.rules;
-            const survRange = rangeText(r.herbSurviveMin, r.herbSurviveMax);
-            const survSymbRange = rangeText(r.herbSurviveMinWithSymb, r.herbSurviveMax);
-            const birthRange = rangeText(r.herbBirthMin, r.herbBirthMax);
-            const symbSurvRange = r.symbSurviveMaxHerb >= 8
-                ? r.symbSurviveMinHerb + '+'
-                : rangeText(r.symbSurviveMinHerb, r.symbSurviveMaxHerb);
-            const symbBirthRange = rangeText(r.symbBirthMinSymb, r.symbBirthMaxSymb);
+            const herbSpread = rangeText(r.herbBirthMin, r.herbBirthMax);
+            const herbSurv = rangeText(r.herbSurviveMin, r.herbSurviveMax);
+            const symbSpread = rangeText(r.symbBirthMinSymb, r.symbBirthMaxSymb);
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
-                '<li><span class="hl" style="color:var(--cell-alive)">HERBIVORE</span></li>' +
-                '<li>Survives with <span class="hl">' + survRange + '</span> neighbors, or <span class="hl">' + survSymbRange + '</span> if symbiote adjacent.</li>' +
-                '<li>Born with <span class="hl">' + birthRange + '</span> herbivore neighbors.</li>' +
-                '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span></li>' +
-                '<li>Survives with <span class="hl">' + symbSurvRange + '</span> herbivore neighbors.</li>' +
-                '<li>Born with <span class="hl">' + symbBirthRange + '</span> symbiote neighbors + <span class="hl">' + r.symbBirthMinHerb + '+</span> herbivore host.</li>' +
+                '<li><span class="hl" style="color:var(--cell-alive)">HERBIVORE</span> — the prey, a spreading tissue.</li>' +
+                '<li>Grows over bare ground with <span class="hl">' + herbSpread + '</span> herbivore neighbors; survives with <span class="hl">' + herbSurv + '</span>.</li>' +
+                '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span> — a parasite that hunts herbivores.</li>' +
+                '<li><span class="hl">Infects</span> &amp; converts any herbivore touched by <span class="hl">' + r.infectMin + '+</span> symbiotes.</li>' +
+                '<li>Starves without a herbivore host; dies if crowded by <span class="hl">' + r.symbOvercrowdMax + '+</span> symbiotes.</li>' +
+                '<li>Spreads to bare ground with <span class="hl">' + symbSpread + '</span> symbiotes beside a host.</li>' +
                 '</ul>';
             btnTweakRules.classList.remove('hidden');
         } else {
@@ -375,31 +379,25 @@
 
     // --- Rules tweaker modal ---
     const tweakerModal = document.getElementById('rulesTweakerModal');
-    const tweakerToggle = document.getElementById('rSymbCrowds');
 
     // Input element references
     const tweakerInputs = {
-        herbSurviveMin:      document.getElementById('rHerbSurvMin'),
-        herbSurviveMax:      document.getElementById('rHerbSurvMax'),
-        herbSurviveMinWithSymb: document.getElementById('rHerbSurvSymb'),
         herbBirthMin:        document.getElementById('rHerbBirthMin'),
         herbBirthMax:        document.getElementById('rHerbBirthMax'),
-        symbSurviveMinHerb:  document.getElementById('rSymbSurvMinH'),
-        symbSurviveMaxHerb:  document.getElementById('rSymbSurvMaxH'),
+        herbSurviveMin:      document.getElementById('rHerbSurvMin'),
+        herbSurviveMax:      document.getElementById('rHerbSurvMax'),
         symbBirthMinSymb:    document.getElementById('rSymbBirthMinS'),
         symbBirthMaxSymb:    document.getElementById('rSymbBirthMaxS'),
         symbBirthMinHerb:    document.getElementById('rSymbBirthMinH'),
+        symbStarveMinHerb:   document.getElementById('rSymbStarveH'),
+        symbOvercrowdMax:    document.getElementById('rSymbCrowdMax'),
+        infectMin:           document.getElementById('rInfectMin'),
     };
-
-    let tweakerCrowdValue = false;
 
     function populateTweaker(rules) {
         for (const key in tweakerInputs) {
             tweakerInputs[key].value = rules[key];
         }
-        tweakerCrowdValue = rules.symbOvercrowdsHerb;
-        tweakerToggle.textContent = tweakerCrowdValue ? 'YES' : 'NO';
-        tweakerToggle.classList.toggle('on', tweakerCrowdValue);
     }
 
     function readTweaker() {
@@ -407,7 +405,6 @@
         for (const key in tweakerInputs) {
             rules[key] = parseInt(tweakerInputs[key].value, 10) || 0;
         }
-        rules.symbOvercrowdsHerb = tweakerCrowdValue;
         return rules;
     }
 
@@ -423,12 +420,6 @@
     btnTweakRules.addEventListener('click', openTweaker);
     document.getElementById('btnCloseTweaker').addEventListener('click', closeTweaker);
     tweakerModal.addEventListener('click', (e) => { if (e.target === tweakerModal) closeTweaker(); });
-
-    tweakerToggle.addEventListener('click', () => {
-        tweakerCrowdValue = !tweakerCrowdValue;
-        tweakerToggle.textContent = tweakerCrowdValue ? 'YES' : 'NO';
-        tweakerToggle.classList.toggle('on', tweakerCrowdValue);
-    });
 
     document.getElementById('btnApplyRules').addEventListener('click', () => {
         game.rules = readTweaker();
