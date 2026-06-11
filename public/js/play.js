@@ -19,12 +19,12 @@
             game = new GameOfLife(width, height, undefined, gameMode);
         }
     } else {
-        // Fresh visit: start with an empty board. Predator mode is selected by
-        // default; switching to Classic (or back) keeps the board empty. Draw
-        // cells, or press RANDOM, to build a map.
+        // Fresh visit: start with an empty board in Classic mode. Switch to
+        // Predator with the MODE buttons; the board stays empty until you draw
+        // cells or press RANDOM.
         width = 50;
         height = 34;
-        gameMode = GAME_MODE_PREDATOR;
+        gameMode = GAME_MODE_CLASSIC;
         game = new GameOfLife(width, height, undefined, gameMode);
         document.getElementById('mapWidth').value = width;
         document.getElementById('mapHeight').value = height;
