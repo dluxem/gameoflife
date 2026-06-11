@@ -8,7 +8,7 @@
  *                   bits 0-3: encoding mode (0–3)
  *                   bits 4-7: game mode
  *                     0 = Classic Conway
- *                     1 = Symbiotic (herbivore + symbiote)
+ *                     1 = Predator (grazer + hunter)
  *   bytes 3..N:   payload (depends on encoding mode and game mode)
  *   byte N+1:     CRC-8 checksum of all preceding bytes
  *
@@ -29,9 +29,9 @@
  *     Pairs of (x, y) bytes, one per dead cell.
  *     All unlisted cells are alive.
  *
- * --- Symbiotic game mode (game mode 1) ---
+ * --- Predator game mode (game mode 1) ---
  *
- *   Cell values: 0=dead, 1=herbivore, 2=symbiote
+ *   Cell values: 0=dead, 1=grazer, 2=hunter
  *
  *   Encoding mode 0 — 2-bit bitmap:
  *     2 bits per cell, MSB first: bits[7-6]=cell0 .. bits[1-0]=cell3.
@@ -171,7 +171,7 @@ const MapCodec = (() => {
     }
 
     /* ==================================================================
-     *  Symbiotic encoding modes (game mode 1)
+     *  Predator encoding modes (game mode 1)
      * ================================================================== */
 
     /* ---- Encoding mode 0: 2-bit bitmap ---- */
@@ -303,7 +303,7 @@ const MapCodec = (() => {
     /* ---- Public encode ---- */
     function encode(width, height, grid, gameMode = 0) {
         if (gameMode === 1) {
-            return encodeSymbiotic(width, height, grid);
+            return encodePredator(width, height, grid);
         }
         return encodeClassic(width, height, grid);
     }
@@ -324,7 +324,7 @@ const MapCodec = (() => {
         return bytesToBase62(best);
     }
 
-    function encodeSymbiotic(width, height, grid) {
+    function encodePredator(width, height, grid) {
         const gameModePrefix = 1 << 4; // game mode 1, shifted to upper nibble
         const candidates = [
             buildBytes(width, height, gameModePrefix | 0, encodeBitmap2bit(width, height, grid)),

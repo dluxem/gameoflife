@@ -19,11 +19,11 @@
             game = new GameOfLife(width, height, undefined, gameMode);
         }
     } else {
-        // Fresh visit: open in Symbiotic mode with an interesting live pattern so
+        // Fresh visit: open in Predator mode with an interesting live pattern so
         // the ecosystem is one PLAY away. CLEAR empties the board to start fresh.
         width = 50;
         height = 34;
-        gameMode = GAME_MODE_SYMBIOTIC;
+        gameMode = GAME_MODE_PREDATOR;
         game = new GameOfLife(width, height, undefined, gameMode);
         game.seedShowcase();
         document.getElementById('mapWidth').value = width;
@@ -35,8 +35,8 @@
     renderer.render();
 
     let isDrawing = false;
-    let drawValue = null; // cell type to paint (0 = erase, 1 = herbivore, 2 = symbiote)
-    let drawCellType = CELL_HERBIVORE; // selected draw tool
+    let drawValue = null; // cell type to paint (0 = erase, 1 = grazer, 2 = hunter)
+    let drawCellType = CELL_GRAZER; // selected draw tool
 
     // Playback state
     let playing = false;
@@ -60,12 +60,12 @@
 
     function updateCounters() {
         genCount.textContent = gen;
-        if (gameMode === GAME_MODE_SYMBIOTIC) {
+        if (gameMode === GAME_MODE_PREDATOR) {
             const pop = game.populationByType();
-            popCount.textContent = pop.herbivore + pop.symbiote;
+            popCount.textContent = pop.grazer + pop.hunter;
             popBreakdown.innerHTML =
-                ' (<span class="pop-h">' + pop.herbivore + 'H</span>' +
-                ' <span class="pop-s">' + pop.symbiote + 'S</span>)';
+                ' (<span class="pop-grazer">' + pop.grazer + 'G</span>' +
+                ' <span class="pop-hunter">' + pop.hunter + 'H</span>)';
         } else {
             popCount.textContent = game.population();
             popBreakdown.innerHTML = '';
@@ -87,10 +87,10 @@
         gameMode = newMode;
         game.gameMode = gameMode;
 
-        // Strip symbiote cells when switching to classic
+        // Strip hunter cells when switching to classic
         if (!init && gameMode === GAME_MODE_CLASSIC) {
             for (let i = 0; i < game.grid.length; i++) {
-                if (game.grid[i] === CELL_SYMBIOTE) game.grid[i] = CELL_DEAD;
+                if (game.grid[i] === CELL_HUNTER) game.grid[i] = CELL_DEAD;
             }
         }
 
@@ -100,13 +100,13 @@
         });
 
         // Show/hide cell type selector
-        cellTypeSelector.classList.toggle('hidden', gameMode !== GAME_MODE_SYMBIOTIC);
+        cellTypeSelector.classList.toggle('hidden', gameMode !== GAME_MODE_PREDATOR);
 
-        // Show/hide invert button (not useful in symbiotic mode)
-        if (btnInvert) btnInvert.classList.toggle('hidden', gameMode === GAME_MODE_SYMBIOTIC);
+        // Show/hide invert button (not useful in predator mode)
+        if (btnInvert) btnInvert.classList.toggle('hidden', gameMode === GAME_MODE_PREDATOR);
 
-        // Reset draw type to herbivore
-        drawCellType = CELL_HERBIVORE;
+        // Reset draw type to grazer
+        drawCellType = CELL_GRAZER;
         updateCellTypeBtns();
 
         updateRulesDisplay();
@@ -137,36 +137,30 @@
     });
 
     // --- Rules display ---
-    const btnTweakRules = document.getElementById('btnTweakRules');
-
     function rangeText(min, max) {
         return min === max ? String(min) : min + '-' + max;
     }
 
     function updateRulesDisplay() {
-        if (gameMode === GAME_MODE_SYMBIOTIC) {
+        if (gameMode === GAME_MODE_PREDATOR) {
             const r = game.rules;
-            const herbSpread = rangeText(r.herbBirthMin, r.herbBirthMax);
-            const herbSurv = rangeText(r.herbSurviveMin, r.herbSurviveMax);
-            const symbSpread = rangeText(r.symbBirthMinSymb, r.symbBirthMaxSymb);
+            const grazerBirth = rangeText(r.grazerBirthMin, r.grazerBirthMax);
+            const grazerSurv = rangeText(r.grazerSurviveMin, r.grazerSurviveMax);
+            const hunterSpread = rangeText(r.hunterBirthMin, r.hunterBirthMax);
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
-                '<li><span class="hl" style="color:var(--cell-alive)">HERBIVORE</span> — the prey, a spreading tissue.</li>' +
-                '<li>Grows over bare ground with <span class="hl">' + herbSpread + '</span> herbivore neighbors; survives with <span class="hl">' + herbSurv + '</span>.</li>' +
-                '<li><span class="hl" style="color:var(--cell-symbiote)">SYMBIOTE</span> — a parasite that hunts herbivores.</li>' +
-                '<li><span class="hl">Infects</span> &amp; converts any herbivore touched by <span class="hl">' + r.infectMin + '+</span> symbiotes.</li>' +
-                '<li>Starves without a herbivore host; dies if crowded by <span class="hl">' + r.symbOvercrowdMax + '+</span> symbiotes.</li>' +
-                '<li>Spreads to bare ground with <span class="hl">' + symbSpread + '</span> symbiotes beside a host.</li>' +
+                '<li><span class="grazer">GRAZER</span> &mdash; prey. Grows on <span class="hl">' + grazerBirth + '</span>, lives on <span class="hl">' + grazerSurv + '</span> grazers.</li>' +
+                '<li><span class="hunter">HUNTER</span> &mdash; predator. Converts any grazer touched by <span class="hl">' + r.huntMin + '+</span> hunters.</li>' +
+                '<li>Hunters starve with no grazer host; die if crowded by <span class="hl">' + r.hunterOvercrowdMax + '+</span>.</li>' +
+                '<li>Hunters spread to bare ground: <span class="hl">' + hunterSpread + '</span> beside a host.</li>' +
                 '</ul>';
-            btnTweakRules.classList.remove('hidden');
         } else {
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
-                '<li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>' +
-                '<li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>' +
-                '<li>All other cells die or stay dead.</li>' +
+                '<li>Live cell with <span class="hl">2&ndash;3</span> neighbors survives.</li>' +
+                '<li>Dead cell with exactly <span class="hl">3</span> is born.</li>' +
+                '<li>All others die.</li>' +
                 '</ul>';
-            btnTweakRules.classList.add('hidden');
         }
     }
 
@@ -221,7 +215,7 @@
         const pos = renderer.getCellAt(e.clientX, e.clientY);
         if (!pos) return;
         const current = game.get(pos.x, pos.y);
-        if (gameMode === GAME_MODE_SYMBIOTIC) {
+        if (gameMode === GAME_MODE_PREDATOR) {
             // If cell matches the selected draw type, erase it; otherwise place selected type
             drawValue = (current === drawCellType) ? CELL_DEAD : drawCellType;
         } else {
@@ -241,7 +235,7 @@
         const pos = renderer.getCellAt(fakeEvent.clientX, fakeEvent.clientY);
         if (!pos) return;
         const current = game.get(pos.x, pos.y);
-        if (gameMode === GAME_MODE_SYMBIOTIC) {
+        if (gameMode === GAME_MODE_PREDATOR) {
             drawValue = (current === drawCellType) ? CELL_DEAD : drawCellType;
         } else {
             drawValue = current ? 0 : 1;
@@ -376,66 +370,6 @@
         div.textContent = s;
         return div.innerHTML;
     }
-
-    // --- Rules tweaker modal ---
-    const tweakerModal = document.getElementById('rulesTweakerModal');
-
-    // Input element references
-    const tweakerInputs = {
-        herbBirthMin:        document.getElementById('rHerbBirthMin'),
-        herbBirthMax:        document.getElementById('rHerbBirthMax'),
-        herbSurviveMin:      document.getElementById('rHerbSurvMin'),
-        herbSurviveMax:      document.getElementById('rHerbSurvMax'),
-        symbBirthMinSymb:    document.getElementById('rSymbBirthMinS'),
-        symbBirthMaxSymb:    document.getElementById('rSymbBirthMaxS'),
-        symbBirthMinHerb:    document.getElementById('rSymbBirthMinH'),
-        symbStarveMinHerb:   document.getElementById('rSymbStarveH'),
-        symbOvercrowdMax:    document.getElementById('rSymbCrowdMax'),
-        infectMin:           document.getElementById('rInfectMin'),
-    };
-
-    function populateTweaker(rules) {
-        for (const key in tweakerInputs) {
-            tweakerInputs[key].value = rules[key];
-        }
-    }
-
-    function readTweaker() {
-        const rules = {};
-        for (const key in tweakerInputs) {
-            rules[key] = parseInt(tweakerInputs[key].value, 10) || 0;
-        }
-        return rules;
-    }
-
-    function openTweaker() {
-        populateTweaker(game.rules);
-        tweakerModal.classList.remove('hidden');
-    }
-
-    function closeTweaker() {
-        tweakerModal.classList.add('hidden');
-    }
-
-    btnTweakRules.addEventListener('click', openTweaker);
-    document.getElementById('btnCloseTweaker').addEventListener('click', closeTweaker);
-    tweakerModal.addEventListener('click', (e) => { if (e.target === tweakerModal) closeTweaker(); });
-
-    document.getElementById('btnApplyRules').addEventListener('click', () => {
-        game.rules = readTweaker();
-        updateRulesDisplay();
-        closeTweaker();
-    });
-
-    document.getElementById('btnResetRules').addEventListener('click', () => {
-        populateTweaker(GameOfLife.defaultRules());
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !tweakerModal.classList.contains('hidden')) {
-            closeTweaker();
-        }
-    });
 
     // --- Initialize UI state from loaded game mode ---
     setGameMode(gameMode, true);

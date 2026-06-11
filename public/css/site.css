@@ -9,7 +9,7 @@
     --text-dim: #888;
     --cell-alive: #39ff14;
     --cell-dead: #181830;
-    --cell-symbiote: #00e5ff;
+    --cell-hunter: #00e5ff;
     --cell-grid: #3a3a5c;
     --font-arcade: 'Press Start 2P', monospace;
     --font-mono: 'Share Tech Mono', monospace;
@@ -370,6 +370,7 @@ main {
     box-shadow: 0 0 20px rgba(57, 255, 20, 0.15);
     display: flex;
     justify-content: center;
+    align-items: center;
     overflow: hidden;
     cursor: crosshair;
     flex: 1;
@@ -378,6 +379,7 @@ main {
 .edit-area canvas {
     display: block;
     max-width: 100%;
+    height: auto;
     image-rendering: pixelated;
 }
 .edit-sidebar {
@@ -421,6 +423,8 @@ main {
 }
 .rules-list li:last-child { margin-bottom: 0; }
 .rules-list .hl { color: var(--neon-green); }
+.rules-list .grazer { color: var(--cell-alive); font-weight: bold; }
+.rules-list .hunter { color: var(--cell-hunter); font-weight: bold; }
 /* --- Game mode & cell type selectors --- */
 .mode-selector {
     display: flex;
@@ -430,6 +434,7 @@ main {
 }
 .cell-type-selector {
     display: flex;
+    flex-direction: column;
     gap: 0.3rem;
     width: 100%;
 }
@@ -458,11 +463,11 @@ main {
     width: 8px;
     height: 8px;
 }
-.type-dot.herbivore { background: var(--cell-alive); }
-.type-dot.symbiote { background: var(--cell-symbiote); }
+.type-dot.grazer { background: var(--cell-alive); }
+.type-dot.hunter { background: var(--cell-hunter); }
 
-.pop-h { color: var(--cell-alive); }
-.pop-s { color: var(--cell-symbiote); }
+.pop-grazer { color: var(--cell-alive); }
+.pop-hunter { color: var(--cell-hunter); }
 
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
@@ -528,80 +533,6 @@ main {
     image-rendering: pixelated;
 }
 
-/* --- Rules tweaker --- */
-.tweaker-trigger {
-    margin-top: 0.5rem;
-    width: 100%;
-    border-style: dashed;
-    color: var(--text-dim);
-    border-color: var(--text-dim);
-}
-.tweaker-trigger:hover {
-    color: var(--neon-magenta);
-    border-color: var(--neon-magenta);
-    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
-}
-.tweaker-modal { width: 520px; }
-.tweaker-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.tweaker-section {
-    border: 1px solid var(--text-dim);
-    padding: 0.75rem;
-    margin: 0;
-}
-.tweaker-legend {
-    font-family: var(--font-arcade);
-    font-size: 0.6rem;
-    padding: 0 0.4rem;
-}
-.tweaker-legend.herb-color { color: var(--cell-alive); }
-.tweaker-legend.symb-color { color: var(--cell-symbiote); }
-.tweaker-legend.interact-color { color: var(--neon-magenta); }
-.tweaker-group { margin-bottom: 0.6rem; }
-.tweaker-group:last-child { margin-bottom: 0; }
-.tweaker-label {
-    font-family: var(--font-arcade);
-    font-size: 0.5rem;
-    color: var(--neon-yellow);
-    display: block;
-    margin-bottom: 0.3rem;
-}
-.tweaker-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-bottom: 0.3rem;
-}
-.tweaker-row:last-child { margin-bottom: 0; }
-.tweaker-hint {
-    font-family: var(--font-arcade);
-    font-size: 0.45rem;
-    color: var(--text-dim);
-    white-space: nowrap;
-}
-.tweaker-num {
-    width: 52px;
-    padding: 0.25rem 0.4rem;
-    font-size: 0.85rem;
-    text-align: center;
-}
-.tweaker-toggle {
-    min-width: 50px;
-}
-.tweaker-toggle.on {
-    color: var(--neon-green);
-    border-color: var(--neon-green);
-    box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
-}
-.tweaker-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-}
-
 /* --- Error page --- */
 .error-screen { text-align: center; padding: 3rem 1rem; }
 .error-screen h1 { font-size: 2rem; margin-bottom: 1rem; }
@@ -630,6 +561,29 @@ body::after {
 }
 
 /* --- Responsive --- */
+
+/*
+ * Compact editor: keep the whole tool (toolbar + board + sidebar + controls)
+ * inside a ~1024x768 viewport without scrolling. Larger screens skip this block
+ * and keep the roomy layout, so the board still scales up on big displays.
+ */
+@media (max-width: 1100px), (max-height: 820px) {
+    main { padding: 0.6rem; }
+    .edit-header { margin-bottom: 0.35rem; }
+    .map-title { font-size: 0.75rem; }
+    .edit-toolbar { gap: 0.3rem; margin-bottom: 0.4rem; }
+    .edit-grid-row { gap: 0.6rem; margin-bottom: 0.6rem; }
+    .edit-sidebar { width: 170px; gap: 0.5rem; }
+    .edit-settings, .edit-rules { padding: 0.5rem; }
+    .sidebar-title { font-size: 0.55rem; margin-bottom: 0.35rem; }
+    .rules-list { font-size: 0.66rem; line-height: 1.4; }
+    .rules-list li { margin-bottom: 0.35rem; }
+    .arcade-btn.small { padding: 0.25rem 0.4rem; font-size: 0.5rem; }
+    .play-controls { gap: 0.4rem; padding: 0.5rem; margin-bottom: 0.6rem; }
+    /* Cap the board's drawn height so the column always fits above the fold. */
+    .edit-area canvas { max-height: 56vh; }
+}
+
 @media (max-width: 600px) {
     .arcade-nav { flex-direction: column; gap: 0.5rem; text-align: center; }
     .hero .title { font-size: 1.2rem; }
@@ -638,4 +592,6 @@ body::after {
     .share-form .arcade-input { max-width: 100%; }
     .edit-grid-row { flex-direction: column; }
     .edit-sidebar { width: auto; }
+    /* On phones the board can use more height since it stacks above the sidebar. */
+    .edit-area canvas { max-height: 70vh; }
 }

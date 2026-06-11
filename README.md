@@ -15,31 +15,31 @@ Standard Conway's Game of Life:
 3. Any live cell with more than three live neighbors dies (overpopulation).
 4. Any dead cell with exactly three live neighbors becomes a live cell (reproduction).
 
-### Symbiotic
+### Predator
 
-Introduces two cell types — **herbivores** (green) and **symbiotes** (blue) — locked in a **host/parasite** relationship. "Symbiote" here means a parasite (parasitism is a form of symbiosis): the blue cells hunt and consume the green ones.
+Introduces two cell types — **grazers** (green) and **hunters** (cyan) — locked in a **predator/prey** relationship. Grazers are a renewable prey that spread like a tissue; hunters are a pack predator that sweeps through them and converts them.
 
-Unlike a mutualism — which is *stabilizing* and tends to settle into still-lifes just like plain Conway — this coupling is deliberately **unstable**, and that is what makes it interesting. The two species form a predator/prey system that behaves like an [excitable medium](https://en.wikipedia.org/wiki/Excitable_medium): herbivores spread as a renewable tissue, symbiotes sweep through them as **infection waves**, and the bare ground left behind regrows. The result is perpetual motion — travelling fronts, spirals, and boom/bust population cycles — instead of a frozen board.
+Unlike a stable food web — which tends to settle into still-lifes just like plain Conway — this coupling is deliberately **unstable**, and that is what makes it interesting. The two species behave like an [excitable medium](https://en.wikipedia.org/wiki/Excitable_medium): grazers spread as a renewable tissue, hunters sweep through them as **hunting waves**, and the bare ground left behind regrows. The result is perpetual motion — travelling fronts, spirals, and boom/bust population cycles — instead of a frozen board.
 
-The interaction runs in **both directions**, which the old mutualistic rules lacked:
+The interaction runs in **both directions**:
 
-- Herbivores feed the symbiotes (and are killed by them).
-- Symbiotes thin the herbivores, opening space the herbivores then recolonize.
+- Grazers feed the hunters (and are caught by them).
+- Hunters thin the grazers, opening space the grazers then recolonize.
 
-#### Herbivore Rules (green) — the prey
+A future third species — an **apex** predator that preys on the hunters — is reserved in the encoding and rules for later.
 
-- **Spreads** into bare ground with **2–8** herbivore neighbors (a fast-regrowing tissue, so the gaps the parasite carves are quickly refilled).
-- **Survives** with **2–8** herbivore neighbors.
-- **Is consumed** — converted into a symbiote — when touched by **3 or more** symbiotes (see Predation).
+#### Grazer Rules (green) — the prey
 
-#### Symbiote Rules (blue) — the parasite
+- **Spreads** into bare ground with **2–8** grazer neighbors (a fast-regrowing tissue, so the gaps the hunters carve are quickly refilled).
+- **Survives** with **2–8** grazer neighbors.
+- **Is caught** — converted into a hunter — when touched by **3 or more** hunters (see Predation).
 
-- **Infects:** any herbivore with **3+** symbiote neighbors becomes a symbiote next tick (prey biomass is turned into more parasites — this is how blue advances through green).
-- **Spreads** to bare ground with **2–3** symbiote neighbors *and* at least **1** adjacent herbivore host.
-- **Starves** (dies) with no adjacent herbivore — so once a region is eaten out, the parasite dies back, leaving bare ground for the herbivores to reclaim.
-- **Overcrowds** (dies) with **4+** symbiote neighbors — so the parasite can never solidify into a static block; its fronts stay thin and keep moving toward fresh prey.
+#### Hunter Rules (cyan) — the predator
 
-All of these thresholds are adjustable live in the editor via the **TWEAK** button (the Rules Tweaker), so you can push the system toward herbivore blooms, parasite plagues, or a balanced standoff.
+- **Hunts:** any grazer with **3+** hunter neighbors becomes a hunter next tick (prey biomass is turned into more hunters — this is how cyan advances through green).
+- **Spreads** to bare ground with **2–3** hunter neighbors *and* at least **1** adjacent grazer host.
+- **Starves** (dies) with no adjacent grazer — so once a region is hunted out, the pack dies back, leaving bare ground for the grazers to reclaim.
+- **Overcrowds** (dies) with **4+** hunter neighbors — so the pack can never solidify into a static block; its fronts stay thin and keep moving toward fresh prey.
 
 ## Pages
 
@@ -48,7 +48,7 @@ All of these thresholds are adjustable live in the editor via the **TWEAK** butt
 | Home | `index.html` | Enter a map code to load, or navigate to the editor |
 | Editor / Player | `play.html` | Create a new map, draw cells, run the simulation, and share |
 
-Opening `play.html` without a hash starts in Symbiotic mode with a ready-made "interesting" board — two counter-rotating waves on a 50×34 grid that bloom into the host/parasite ecosystem as soon as you press **PLAY**. Press **CLEAR** to empty the board and start from scratch. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
+Opening `play.html` without a hash starts in Predator mode with a ready-made "interesting" board — two counter-rotating waves on a 50×34 grid that bloom into the predator/prey ecosystem as soon as you press **PLAY**. Press **CLEAR** to empty the board and start from scratch. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
 
 ## Map Code Encoding
 
@@ -86,7 +86,7 @@ The encoder uses **adaptive encoding** — it tries multiple encoding modes and 
 The mode byte encodes both the **game mode** and the **encoding mode**:
 
 ```
-Bits 4-7:  game mode      (0 = Classic, 1 = Symbiotic)
+Bits 4-7:  game mode      (0 = Classic, 1 = Predator)
 Bits 0-3:  encoding mode  (varies by game mode)
 ```
 
@@ -124,9 +124,9 @@ Same format as mode 2, but lists the *dead* cells. All unlisted cells are alive.
 
 Best for very dense boards (most cells alive).
 
-### Symbiotic Encoding Modes (game mode 1)
+### Predator Encoding Modes (game mode 1)
 
-Cell values: `0` = dead, `1` = herbivore, `2` = symbiote.
+Cell values: `0` = dead, `1` = grazer, `2` = hunter.
 
 #### Mode 0 — 2-Bit Bitmap
 

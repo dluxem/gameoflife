@@ -41,14 +41,14 @@
                         <h2 class="sidebar-title">MODE</h2>
                         <div class="mode-selector">
                             <button id="btnModeClassic" class="arcade-btn small mode-btn active" data-mode="0">CLASSIC</button>
-                            <button id="btnModeSymbiotic" class="arcade-btn small mode-btn" data-mode="1">SYMBIOTIC</button>
+                            <button id="btnModePredator" class="arcade-btn small mode-btn" data-mode="1">PREDATOR</button>
                         </div>
                     </div>
                     <div id="cellTypeSelector" class="edit-settings hidden">
                         <h2 class="sidebar-title">DRAW</h2>
                         <div class="cell-type-selector">
-                            <button class="arcade-btn small cell-type-btn active" data-type="1"><span class="type-dot herbivore"></span>HERB</button>
-                            <button class="arcade-btn small cell-type-btn" data-type="2"><span class="type-dot symbiote"></span>SYMB</button>
+                            <button class="arcade-btn small cell-type-btn active" data-type="1"><span class="type-dot grazer"></span>GRAZER</button>
+                            <button class="arcade-btn small cell-type-btn" data-type="2"><span class="type-dot hunter"></span>HUNTER</button>
                         </div>
                     </div>
                     <div class="edit-settings">
@@ -67,12 +67,11 @@
                         <h2 class="sidebar-title">RULES</h2>
                         <div id="rulesContent">
                             <ul class="rules-list">
-                                <li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>
-                                <li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>
-                                <li>All other cells die or stay dead.</li>
+                                <li>Live cell with <span class="hl">2&ndash;3</span> neighbors survives.</li>
+                                <li>Dead cell with exactly <span class="hl">3</span> is born.</li>
+                                <li>All others die.</li>
                             </ul>
                         </div>
-                        <button id="btnTweakRules" class="arcade-btn small tweaker-trigger hidden">TWEAK</button>
                     </div>
                 </div>
             </div>
@@ -88,86 +87,6 @@
                 </div>
                 <span class="generation-counter">GEN: <span id="genCount">0</span></span>
                 <span class="population-counter">POP: <span id="popCount">0</span><span id="popBreakdown"></span></span>
-            </div>
-
-            <div id="rulesTweakerModal" class="modal hidden">
-                <div class="modal-content tweaker-modal">
-                    <div class="modal-header">
-                        <h2>RULES TWEAKER</h2>
-                        <button id="btnCloseTweaker" class="arcade-btn small">X</button>
-                    </div>
-                    <div class="tweaker-body">
-                        <fieldset class="tweaker-section">
-                            <legend class="tweaker-legend herb-color">HERBIVORE</legend>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">SPREAD</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rHerbBirthMin" class="arcade-input tweaker-num" min="0" max="8" value="2" />
-                                    <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rHerbBirthMax" class="arcade-input tweaker-num" min="0" max="8" value="8" />
-                                    <span class="tweaker-hint">herb neighbors</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">SURVIVE</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rHerbSurvMin" class="arcade-input tweaker-num" min="0" max="8" value="2" />
-                                    <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rHerbSurvMax" class="arcade-input tweaker-num" min="0" max="8" value="8" />
-                                    <span class="tweaker-hint">herb neighbors</span>
-                                </div>
-                            </div>
-                        </fieldset>
-                        <fieldset class="tweaker-section">
-                            <legend class="tweaker-legend symb-color">SYMBIOTE</legend>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">SPREAD</label>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">min</span>
-                                    <input type="number" id="rSymbBirthMinS" class="arcade-input tweaker-num" min="0" max="8" value="2" />
-                                    <span class="tweaker-hint">to</span>
-                                    <input type="number" id="rSymbBirthMaxS" class="arcade-input tweaker-num" min="0" max="8" value="3" />
-                                    <span class="tweaker-hint">symb neighbors</span>
-                                </div>
-                                <div class="tweaker-row">
-                                    <span class="tweaker-hint">+ min</span>
-                                    <input type="number" id="rSymbBirthMinH" class="arcade-input tweaker-num" min="0" max="8" value="1" />
-                                    <span class="tweaker-hint">herb host</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">STARVES BELOW</label>
-                                <div class="tweaker-row">
-                                    <input type="number" id="rSymbStarveH" class="arcade-input tweaker-num" min="0" max="8" value="1" />
-                                    <span class="tweaker-hint">herb neighbors</span>
-                                </div>
-                            </div>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">OVERCROWDS AT</label>
-                                <div class="tweaker-row">
-                                    <input type="number" id="rSymbCrowdMax" class="arcade-input tweaker-num" min="1" max="8" value="4" />
-                                    <span class="tweaker-hint">symb neighbors</span>
-                                </div>
-                            </div>
-                        </fieldset>
-                        <fieldset class="tweaker-section">
-                            <legend class="tweaker-legend interact-color">PREDATION</legend>
-                            <div class="tweaker-group">
-                                <label class="tweaker-label">HERBIVORE INFECTED AT</label>
-                                <div class="tweaker-row">
-                                    <input type="number" id="rInfectMin" class="arcade-input tweaker-num" min="1" max="8" value="3" />
-                                    <span class="tweaker-hint">symb neighbors</span>
-                                </div>
-                            </div>
-                        </fieldset>
-                        <div class="tweaker-actions">
-                            <button id="btnResetRules" class="arcade-btn small">DEFAULTS</button>
-                            <button id="btnApplyRules" class="arcade-btn small primary">APPLY</button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div id="shareModal" class="modal hidden">

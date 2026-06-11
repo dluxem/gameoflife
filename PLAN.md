@@ -1,5 +1,19 @@
 # Herbivore + Symbiote Game Mode — Implementation Plan
 
+> **Status / terminology note (kept for history).** This is the original
+> plan-of-record. The feature shipped, but two things changed afterward and the
+> code/UI/README are the source of truth:
+>
+> - **Renaming.** The species and mode were rethemed for an arcade feel:
+>   *Herbivore → **Grazer*** (green prey), *Symbiote → **Hunter*** (cyan
+>   predator), *Symbiotic mode → **Predator** mode*. The reserved third species
+>   (`CELL_PREDATOR` below) is now the **Apex** predator (`CELL_APEX = 3`).
+>   Wherever this document says herbivore/symbiote/symbiotic, read
+>   grazer/hunter/predator; the codec game-mode value is unchanged (`1`), so old
+>   share codes still load.
+> - **Rules Tweaker removed.** A live in-editor rules tweaker was added and then
+>   removed; the rules are now the fixed `GameOfLife.defaultRules()` defaults.
+
 ## Overview
 
 Add a "Herbivore" game mode alongside the existing Classic Conway mode. In this mode, cells are either **herbivores** (green) or **symbiotes** (blue). Symbiotes depend on herbivore hosts; herbivores benefit from symbiote adjacency. A game mode selector on the editor page lets users choose which rule set to play. Existing encoded maps continue to work as Classic mode.
