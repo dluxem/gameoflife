@@ -144,15 +144,14 @@
     function updateRulesDisplay() {
         if (gameMode === GAME_MODE_PREDATOR) {
             const r = game.rules;
-            const grazerBirth = rangeText(r.grazerBirthMin, r.grazerBirthMax);
-            const grazerSurv = rangeText(r.grazerSurviveMin, r.grazerSurviveMax);
+            const grazerRange = rangeText(r.grazerBirthMin, r.grazerBirthMax);
             const hunterSpread = rangeText(r.hunterBirthMin, r.hunterBirthMax);
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
-                '<li><span class="grazer">GRAZER</span> &mdash; prey. Grows on <span class="hl">' + grazerBirth + '</span>, lives on <span class="hl">' + grazerSurv + '</span> grazers.</li>' +
-                '<li><span class="hunter">HUNTER</span> &mdash; predator. Converts any grazer touched by <span class="hl">' + r.huntMin + '+</span> hunters.</li>' +
-                '<li>Hunters starve with no grazer host; die if crowded by <span class="hl">' + r.hunterOvercrowdMax + '+</span>.</li>' +
-                '<li>Hunters spread to bare ground: <span class="hl">' + hunterSpread + '</span> beside a host.</li>' +
+                '<li><span class="grazer">GRAZER</span> &mdash; prey. Grows &amp; lives on <span class="hl">' + grazerRange + '</span> grazers.</li>' +
+                '<li><span class="hunter">HUNTER</span> &mdash; predator. Converts grazers touched by <span class="hl">' + r.huntMin + '+</span>.</li>' +
+                '<li>Starves with no grazer; dies if <span class="hl">' + r.hunterOvercrowdMax + '+</span> crowd.</li>' +
+                '<li>Spreads on bare ground: <span class="hl">' + hunterSpread + '</span> by a host.</li>' +
                 '</ul>';
         } else {
             rulesContent.innerHTML =

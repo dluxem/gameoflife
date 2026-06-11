@@ -389,6 +389,30 @@ main {
     flex-direction: column;
     gap: 0.75rem;
 }
+
+/*
+ * Editor viewport-fit layout. Lock the editor page to the window height and let
+ * the board scale to fill the space between the toolbar and the controls bar, so
+ * the PLAY/STEP/RESET bar and the footer stay on-screen at any window size. The
+ * RULES sidebar scrolls internally instead of making the whole column taller —
+ * which is what used to push the controls off the bottom on tall, wide screens.
+ * Phones opt out of this and use normal document flow (see the max-width:600 block).
+ */
+.editor-page { height: 100vh; overflow: hidden; }
+.editor-page main { min-height: 0; overflow-y: auto; }
+.editor-page .edit-container {
+    height: 100%;
+    min-height: 0;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+}
+.editor-page .edit-grid-row { flex: 1 1 auto; min-height: 0; align-items: stretch; }
+.editor-page .edit-area { min-height: 0; }
+.editor-page .edit-area canvas { max-height: 100%; }
+.editor-page .edit-sidebar { height: 100%; overflow-y: auto; }
+.editor-page .edit-sidebar::-webkit-scrollbar { width: 6px; }
+.editor-page .edit-sidebar::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 3px; }
 .edit-settings {
     padding: 0.75rem;
     background: var(--bg-panel);
@@ -573,15 +597,13 @@ body::after {
     .map-title { font-size: 0.75rem; }
     .edit-toolbar { gap: 0.3rem; margin-bottom: 0.4rem; }
     .edit-grid-row { gap: 0.6rem; margin-bottom: 0.6rem; }
-    .edit-sidebar { width: 170px; gap: 0.5rem; }
-    .edit-settings, .edit-rules { padding: 0.5rem; }
-    .sidebar-title { font-size: 0.55rem; margin-bottom: 0.35rem; }
-    .rules-list { font-size: 0.66rem; line-height: 1.4; }
-    .rules-list li { margin-bottom: 0.35rem; }
+    .edit-sidebar { width: 170px; gap: 0.4rem; }
+    .edit-settings, .edit-rules { padding: 0.4rem; }
+    .sidebar-title { font-size: 0.55rem; margin-bottom: 0.3rem; }
+    .rules-list { font-size: 0.63rem; line-height: 1.35; }
+    .rules-list li { margin-bottom: 0.3rem; }
     .arcade-btn.small { padding: 0.25rem 0.4rem; font-size: 0.5rem; }
     .play-controls { gap: 0.4rem; padding: 0.5rem; margin-bottom: 0.6rem; }
-    /* Cap the board's drawn height so the column always fits above the fold. */
-    .edit-area canvas { max-height: 56vh; }
 }
 
 @media (max-width: 600px) {
@@ -592,6 +614,11 @@ body::after {
     .share-form .arcade-input { max-width: 100%; }
     .edit-grid-row { flex-direction: column; }
     .edit-sidebar { width: auto; }
-    /* On phones the board can use more height since it stacks above the sidebar. */
-    .edit-area canvas { max-height: 70vh; }
+    /* Phones: drop the viewport lock and just scroll the page normally. */
+    .editor-page { height: auto; overflow: visible; }
+    .editor-page main { overflow-y: visible; }
+    .editor-page .edit-container { height: auto; display: block; }
+    .editor-page .edit-sidebar { height: auto; overflow: visible; }
+    /* The board stacks above the sidebar, so let it use more height. */
+    .editor-page .edit-area canvas { max-height: 70vh; }
 }
