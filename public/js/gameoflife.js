@@ -1,8 +1,50 @@
+/* Cell type constants */
+const CELL_DEAD = 0;
+const CELL_GRAZER = 1;
+const CELL_HUNTER = 2;
+/* const CELL_APEX = 3; */   // reserved for a future third species (apex predator)
+
+/* Game mode constants */
+const GAME_MODE_CLASSIC = 0;
+const GAME_MODE_PREDATOR = 1;
+/* game-mode nibble values 2+ are reserved for future ecosystems */
+
 class GameOfLife {
-    constructor(width, height, grid) {
+    static defaultRules() {
+        return {
+            /*
+             * Grazer (green) — the prey, modelled as a space-filling "tissue".
+             * It readily regrows into bare ground (low birth threshold, wide
+             * survival range), so the gaps the hunters carve get refilled. That
+             * constant supply of fresh prey is what keeps the predator/prey waves
+             * from starving out and freezing the way strict Conway does.
+             */
+            grazerBirthMin: 2,      // empty cell becomes grazer with this many...
+            grazerBirthMax: 8,      // ...to this many grazer neighbors
+            grazerSurviveMin: 2,    // grazer survives with this many...
+            grazerSurviveMax: 8,    // ...to this many grazer neighbors
+
+            /* Predation — hunters convert the grazers they surround into new hunters. */
+            huntMin: 3,             // a grazer with >= this many hunter neighbors is
+                                    // caught and becomes a hunter next tick
+
+            /* Hunter (cyan) — the predator. Cannot live without grazer prey. */
+            hunterStarveMinHost: 1, // hunter starves (dies) below this many
+                                    // grazer neighbors
+            hunterOvercrowdMax: 4,  // hunter dies of competition with this many or more
+                                    // hunter neighbors (keeps fronts thin and moving)
+            hunterBirthMin: 2,      // empty cell becomes hunter with this many...
+            hunterBirthMax: 3,      // ...to this many hunter neighbors,
+            hunterBirthMinHost: 1,  // ...and at least this many grazer neighbors (food)
+        };
+    }
+
+    constructor(width, height, grid, gameMode = GAME_MODE_CLASSIC) {
         this.width = width;
         this.height = height;
         this.grid = grid ? new Uint8Array(grid) : new Uint8Array(width * height);
+        this.gameMode = gameMode;
+        this.rules = GameOfLife.defaultRules();
     }
 
     get(x, y) {
@@ -12,7 +54,7 @@ class GameOfLife {
 
     set(x, y, value) {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            this.grid[y * this.width + x] = value ? 1 : 0;
+            this.grid[y * this.width + x] = value;
         }
     }
 
@@ -31,14 +73,39 @@ class GameOfLife {
                 const nx = x + dx;
                 const ny = y + dy;
                 if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                    count += this.grid[ny * this.width + nx];
+                    if (this.grid[ny * this.width + nx]) count++;
                 }
             }
         }
         return count;
     }
 
+    countNeighborsByType(x, y) {
+        let grazer = 0, hunter = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                    const v = this.grid[ny * this.width + nx];
+                    if (v === CELL_GRAZER) grazer++;
+                    else if (v === CELL_HUNTER) hunter++;
+                }
+            }
+        }
+        return { total: grazer + hunter, grazer, hunter };
+    }
+
     step() {
+        if (this.gameMode === GAME_MODE_PREDATOR) {
+            this._stepPredator();
+        } else {
+            this._stepClassic();
+        }
+    }
+
+    _stepClassic() {
         const next = new Uint8Array(this.width * this.height);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
@@ -54,17 +121,100 @@ class GameOfLife {
         this.grid = next;
     }
 
+    /*
+     * Predator mode is a predator/prey system, not a mutualism. The coupling runs
+     * in both directions and is deliberately unstable, which is what produces
+     * travelling fronts and boom/bust cycles instead of the static still-lifes
+     * that mutualism (or plain Conway) settles into:
+     *
+     *   - Grazers (green) grow into empty space by Conway's rules.
+     *   - Hunters (cyan) cannot reproduce on their own; they spread by CONVERTING
+     *     adjacent grazers, turning prey biomass into more predators.
+     *   - A hunter with no grazer neighbour STARVES, so the pack dies back once it
+     *     has eaten out a region, leaving bare space the grazers regrow into. That
+     *     prey -> hunted -> empty -> regrown loop is an excitable medium: it
+     *     sustains spiral/ring waves rather than freezing.
+     *   - Hunters also die when packed too tightly, so they can never settle into a
+     *     solid sterile block; the pack is forced to keep moving toward fresh prey.
+     */
+    _stepPredator() {
+        const next = new Uint8Array(this.width * this.height);
+        const r = this.rules;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const idx = y * this.width + x;
+                const cell = this.grid[idx];
+                const n = this.countNeighborsByType(x, y);
+
+                if (cell === CELL_GRAZER) {
+                    if (n.hunter >= r.huntMin) {
+                        next[idx] = CELL_HUNTER;              // caught by the pack
+                    } else if (n.grazer >= r.grazerSurviveMin && n.grazer <= r.grazerSurviveMax) {
+                        next[idx] = CELL_GRAZER;              // Conway survival
+                    }                                         // else: dies of over/under-population
+                } else if (cell === CELL_HUNTER) {
+                    if (n.grazer >= r.hunterStarveMinHost && n.hunter < r.hunterOvercrowdMax) {
+                        next[idx] = CELL_HUNTER;              // fed and uncrowded -> persists
+                    }                                         // else: starves or overcrowds
+                } else {
+                    if (n.grazer >= r.grazerBirthMin && n.grazer <= r.grazerBirthMax) {
+                        next[idx] = CELL_GRAZER;              // prey colonises empty space first
+                    } else if (n.hunter >= r.hunterBirthMin && n.hunter <= r.hunterBirthMax
+                               && n.grazer >= r.hunterBirthMinHost) {
+                        next[idx] = CELL_HUNTER;              // pack seeds next to its prey
+                    }
+                }
+            }
+        }
+        this.grid = next;
+    }
+
     population() {
         let count = 0;
-        for (let i = 0; i < this.grid.length; i++) count += this.grid[i];
+        for (let i = 0; i < this.grid.length; i++) {
+            if (this.grid[i]) count++;
+        }
         return count;
+    }
+
+    populationByType() {
+        let grazer = 0, hunter = 0;
+        for (let i = 0; i < this.grid.length; i++) {
+            if (this.grid[i] === CELL_GRAZER) grazer++;
+            else if (this.grid[i] === CELL_HUNTER) hunter++;
+        }
+        return { grazer, hunter };
     }
 
     clear() { this.grid.fill(0); }
 
     randomize(density = 0.3) {
+        if (this.gameMode === GAME_MODE_PREDATOR) {
+            this._randomizePredator();
+        } else {
+            for (let i = 0; i < this.grid.length; i++) {
+                this.grid[i] = Math.random() < density ? 1 : 0;
+            }
+        }
+    }
+
+    _randomizePredator() {
+        // A field of grazers (prey) at moderate density...
         for (let i = 0; i < this.grid.length; i++) {
-            this.grid[i] = Math.random() < density ? 1 : 0;
+            this.grid[i] = Math.random() < 0.34 ? CELL_GRAZER : CELL_DEAD;
+        }
+        // ...plus a handful of small hunter "packs". Each pack is a 2x2 cluster so
+        // the hunters already meet their birth/hunt thresholds and start a spreading
+        // wave, instead of sitting inert as isolated dots.
+        const packs = Math.max(3, Math.round((this.width * this.height) / 400));
+        for (let f = 0; f < packs; f++) {
+            const cx = Math.floor(Math.random() * (this.width - 1));
+            const cy = Math.floor(Math.random() * (this.height - 1));
+            for (let dy = 0; dy <= 1; dy++) {
+                for (let dx = 0; dx <= 1; dx++) {
+                    this.set(cx + dx, cy + dy, CELL_HUNTER);
+                }
+            }
         }
     }
 
@@ -75,7 +225,9 @@ class GameOfLife {
     }
 
     clone() {
-        return new GameOfLife(this.width, this.height, this.grid);
+        const c = new GameOfLife(this.width, this.height, this.grid, this.gameMode);
+        c.rules = Object.assign({}, this.rules);
+        return c;
     }
 }
 
@@ -86,6 +238,7 @@ class GameRenderer {
         this.game = game;
         this.cellSize = options.cellSize || this._calcCellSize(options.maxWidth || 800);
         this.colorAlive = options.colorAlive || '#39ff14';
+        this.colorHunter = options.colorHunter || '#00e5ff';
         this.colorDead = options.colorDead || '#181830';
         this.colorGrid = options.colorGrid || '#3a3a5c';
         this.showGrid = options.showGrid !== false;
@@ -123,11 +276,18 @@ class GameRenderer {
             }
         }
 
-        ctx.fillStyle = this.colorAlive;
         const pad = this.showGrid && cellSize > 3 ? 0.5 : 0;
         for (let y = 0; y < game.height; y++) {
             for (let x = 0; x < game.width; x++) {
-                if (game.get(x, y)) {
+                const v = game.get(x, y);
+                if (v === CELL_GRAZER) {
+                    ctx.fillStyle = this.colorAlive;
+                    ctx.fillRect(
+                        x * cellSize + pad, y * cellSize + pad,
+                        cellSize - pad * 2, cellSize - pad * 2
+                    );
+                } else if (v === CELL_HUNTER) {
+                    ctx.fillStyle = this.colorHunter;
                     ctx.fillRect(
                         x * cellSize + pad, y * cellSize + pad,
                         cellSize - pad * 2, cellSize - pad * 2

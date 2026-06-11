@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/site.css" />
 </head>
-<body>
+<body class="editor-page">
     <header>
         <nav class="arcade-nav">
             <a class="nav-logo" href="index.html">GAME OF LIFE</a>
@@ -38,6 +38,20 @@
                 </div>
                 <div class="edit-sidebar">
                     <div class="edit-settings">
+                        <h2 class="sidebar-title">MODE</h2>
+                        <div class="mode-selector">
+                            <button id="btnModeClassic" class="arcade-btn small mode-btn active" data-mode="0">CLASSIC</button>
+                            <button id="btnModePredator" class="arcade-btn small mode-btn" data-mode="1">PREDATOR</button>
+                        </div>
+                    </div>
+                    <div id="cellTypeSelector" class="edit-settings hidden">
+                        <h2 class="sidebar-title">DRAW</h2>
+                        <div class="cell-type-selector">
+                            <button class="arcade-btn small cell-type-btn active" data-type="1"><span class="type-dot grazer"></span>GRAZER</button>
+                            <button class="arcade-btn small cell-type-btn" data-type="2"><span class="type-dot hunter"></span>HUNTER</button>
+                        </div>
+                    </div>
+                    <div class="edit-settings">
                         <h2 class="sidebar-title">SIZE</h2>
                         <div class="form-row">
                             <label for="mapWidth">W:</label>
@@ -51,11 +65,13 @@
                     </div>
                     <div class="edit-rules">
                         <h2 class="sidebar-title">RULES</h2>
-                        <ul class="rules-list">
-                            <li>Any live cell with <span class="hl">2 or 3</span> neighbors survives.</li>
-                            <li>Any dead cell with exactly <span class="hl">3</span> neighbors becomes alive.</li>
-                            <li>All other cells die or stay dead.</li>
-                        </ul>
+                        <div id="rulesContent">
+                            <ul class="rules-list">
+                                <li>Live cell with <span class="hl">2&ndash;3</span> neighbors survives.</li>
+                                <li>Dead cell with exactly <span class="hl">3</span> is born.</li>
+                                <li>All others die.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,7 +86,7 @@
                     <span id="speedLabel">10</span>
                 </div>
                 <span class="generation-counter">GEN: <span id="genCount">0</span></span>
-                <span class="population-counter">POP: <span id="popCount">0</span></span>
+                <span class="population-counter">POP: <span id="popCount">0</span><span id="popBreakdown"></span></span>
             </div>
 
             <div id="shareModal" class="modal hidden">

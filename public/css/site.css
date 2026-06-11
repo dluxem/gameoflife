@@ -9,6 +9,7 @@
     --text-dim: #888;
     --cell-alive: #39ff14;
     --cell-dead: #181830;
+    --cell-hunter: #00e5ff;
     --cell-grid: #3a3a5c;
     --font-arcade: 'Press Start 2P', monospace;
     --font-mono: 'Share Tech Mono', monospace;
@@ -369,6 +370,7 @@ main {
     box-shadow: 0 0 20px rgba(57, 255, 20, 0.15);
     display: flex;
     justify-content: center;
+    align-items: center;
     overflow: hidden;
     cursor: crosshair;
     flex: 1;
@@ -377,6 +379,7 @@ main {
 .edit-area canvas {
     display: block;
     max-width: 100%;
+    height: auto;
     image-rendering: pixelated;
 }
 .edit-sidebar {
@@ -386,6 +389,30 @@ main {
     flex-direction: column;
     gap: 0.75rem;
 }
+
+/*
+ * Editor viewport-fit layout. Lock the editor page to the window height and let
+ * the board scale to fill the space between the toolbar and the controls bar, so
+ * the PLAY/STEP/RESET bar and the footer stay on-screen at any window size. The
+ * RULES sidebar scrolls internally instead of making the whole column taller —
+ * which is what used to push the controls off the bottom on tall, wide screens.
+ * Phones opt out of this and use normal document flow (see the max-width:600 block).
+ */
+.editor-page { height: 100vh; overflow: hidden; }
+.editor-page main { min-height: 0; overflow-y: auto; }
+.editor-page .edit-container {
+    height: 100%;
+    min-height: 0;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+}
+.editor-page .edit-grid-row { flex: 1 1 auto; min-height: 0; align-items: stretch; }
+.editor-page .edit-area { min-height: 0; }
+.editor-page .edit-area canvas { max-height: 100%; }
+.editor-page .edit-sidebar { height: 100%; overflow-y: auto; }
+.editor-page .edit-sidebar::-webkit-scrollbar { width: 6px; }
+.editor-page .edit-sidebar::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 3px; }
 .edit-settings {
     padding: 0.75rem;
     background: var(--bg-panel);
@@ -420,6 +447,52 @@ main {
 }
 .rules-list li:last-child { margin-bottom: 0; }
 .rules-list .hl { color: var(--neon-green); }
+.rules-list .grazer { color: var(--cell-alive); font-weight: bold; }
+.rules-list .hunter { color: var(--cell-hunter); font-weight: bold; }
+/* --- Game mode & cell type selectors --- */
+.mode-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+}
+.cell-type-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+}
+.mode-btn, .cell-type-btn {
+    flex: 1;
+    text-align: center;
+}
+.mode-btn.active {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+    box-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+}
+.cell-type-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    justify-content: center;
+}
+.cell-type-btn.active {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+    box-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+}
+.type-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+}
+.type-dot.grazer { background: var(--cell-alive); }
+.type-dot.hunter { background: var(--cell-hunter); }
+
+.pop-grazer { color: var(--cell-alive); }
+.pop-hunter { color: var(--cell-hunter); }
+
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 
 #shareModal .modal-content {
@@ -512,6 +585,27 @@ body::after {
 }
 
 /* --- Responsive --- */
+
+/*
+ * Compact editor: keep the whole tool (toolbar + board + sidebar + controls)
+ * inside a ~1024x768 viewport without scrolling. Larger screens skip this block
+ * and keep the roomy layout, so the board still scales up on big displays.
+ */
+@media (max-width: 1100px), (max-height: 820px) {
+    main { padding: 0.6rem; }
+    .edit-header { margin-bottom: 0.35rem; }
+    .map-title { font-size: 0.75rem; }
+    .edit-toolbar { gap: 0.3rem; margin-bottom: 0.4rem; }
+    .edit-grid-row { gap: 0.6rem; margin-bottom: 0.6rem; }
+    .edit-sidebar { width: 170px; gap: 0.4rem; }
+    .edit-settings, .edit-rules { padding: 0.4rem; }
+    .sidebar-title { font-size: 0.55rem; margin-bottom: 0.3rem; }
+    .rules-list { font-size: 0.63rem; line-height: 1.35; }
+    .rules-list li { margin-bottom: 0.3rem; }
+    .arcade-btn.small { padding: 0.25rem 0.4rem; font-size: 0.5rem; }
+    .play-controls { gap: 0.4rem; padding: 0.5rem; margin-bottom: 0.6rem; }
+}
+
 @media (max-width: 600px) {
     .arcade-nav { flex-direction: column; gap: 0.5rem; text-align: center; }
     .hero .title { font-size: 1.2rem; }
@@ -520,4 +614,11 @@ body::after {
     .share-form .arcade-input { max-width: 100%; }
     .edit-grid-row { flex-direction: column; }
     .edit-sidebar { width: auto; }
+    /* Phones: drop the viewport lock and just scroll the page normally. */
+    .editor-page { height: auto; overflow: visible; }
+    .editor-page main { overflow-y: visible; }
+    .editor-page .edit-container { height: auto; display: block; }
+    .editor-page .edit-sidebar { height: auto; overflow: visible; }
+    /* The board stacks above the sidebar, so let it use more height. */
+    .editor-page .edit-area canvas { max-height: 70vh; }
 }
