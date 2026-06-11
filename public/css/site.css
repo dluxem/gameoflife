@@ -10,6 +10,7 @@
     --cell-alive: #39ff14;
     --cell-dead: #181830;
     --cell-hunter: #00e5ff;
+    --cell-apex: #ff2d6b;
     --cell-grid: #3a3a5c;
     --font-arcade: 'Press Start 2P', monospace;
     --font-mono: 'Share Tech Mono', monospace;
@@ -449,6 +450,7 @@ main {
 .rules-list .hl { color: var(--neon-green); }
 .rules-list .grazer { color: var(--cell-alive); font-weight: bold; }
 .rules-list .hunter { color: var(--cell-hunter); font-weight: bold; }
+.rules-list .apex { color: var(--cell-apex); font-weight: bold; }
 /* --- Game mode & cell type selectors --- */
 .mode-selector {
     display: flex;
@@ -489,9 +491,11 @@ main {
 }
 .type-dot.grazer { background: var(--cell-alive); }
 .type-dot.hunter { background: var(--cell-hunter); }
+.type-dot.apex { background: var(--cell-apex); }
 
 .pop-grazer { color: var(--cell-alive); }
 .pop-hunter { color: var(--cell-hunter); }
+.pop-apex { color: var(--cell-apex); }
 
 .edit-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 

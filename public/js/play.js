@@ -35,7 +35,7 @@
     renderer.render();
 
     let isDrawing = false;
-    let drawValue = null; // cell type to paint (0 = erase, 1 = grazer, 2 = hunter)
+    let drawValue = null; // cell type to paint (0 = erase, 1 = grazer, 2 = hunter, 3 = apex)
     let drawCellType = CELL_GRAZER; // selected draw tool
 
     // Playback state
@@ -62,10 +62,11 @@
         genCount.textContent = gen;
         if (gameMode === GAME_MODE_PREDATOR) {
             const pop = game.populationByType();
-            popCount.textContent = pop.grazer + pop.hunter;
+            popCount.textContent = pop.grazer + pop.hunter + pop.apex;
             popBreakdown.innerHTML =
                 ' (<span class="pop-grazer">' + pop.grazer + 'G</span>' +
-                ' <span class="pop-hunter">' + pop.hunter + 'H</span>)';
+                ' <span class="pop-hunter">' + pop.hunter + 'H</span>' +
+                ' <span class="pop-apex">' + pop.apex + 'A</span>)';
         } else {
             popCount.textContent = game.population();
             popBreakdown.innerHTML = '';
@@ -87,10 +88,12 @@
         gameMode = newMode;
         game.gameMode = gameMode;
 
-        // Strip hunter cells when switching to classic
+        // Strip predator-only cells (hunter + apex) when switching to classic
         if (!init && gameMode === GAME_MODE_CLASSIC) {
             for (let i = 0; i < game.grid.length; i++) {
-                if (game.grid[i] === CELL_HUNTER) game.grid[i] = CELL_DEAD;
+                if (game.grid[i] === CELL_HUNTER || game.grid[i] === CELL_APEX) {
+                    game.grid[i] = CELL_DEAD;
+                }
             }
         }
 
@@ -146,12 +149,15 @@
             const r = game.rules;
             const grazerRange = rangeText(r.grazerBirthMin, r.grazerBirthMax);
             const hunterSpread = rangeText(r.hunterBirthMin, r.hunterBirthMax);
+            const apexSurvive = rangeText(r.apexSurviveMin, r.apexSurviveMax);
             rulesContent.innerHTML =
                 '<ul class="rules-list">' +
                 '<li><span class="grazer">GRAZER</span> &mdash; prey. Grows &amp; lives on <span class="hl">' + grazerRange + '</span> grazers.</li>' +
                 '<li><span class="hunter">HUNTER</span> &mdash; predator. Converts grazers touched by <span class="hl">' + r.huntMin + '+</span>.</li>' +
                 '<li>Starves with no grazer; dies if <span class="hl">' + r.hunterOvercrowdMax + '+</span> crowd.</li>' +
                 '<li>Spreads on bare ground: <span class="hl">' + hunterSpread + '</span> by a host.</li>' +
+                '<li><span class="apex">APEX</span> &mdash; top predator. Converts hunters touched by <span class="hl">' + r.apexHuntMin + '+</span>.</li>' +
+                '<li>Runs Conway among apex (survive <span class="hl">' + apexSurvive + '</span>), so it can form stable patterns.</li>' +
                 '</ul>';
         } else {
             rulesContent.innerHTML =

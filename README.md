@@ -17,16 +17,16 @@ Standard Conway's Game of Life:
 
 ### Predator
 
-Introduces two cell types — **grazers** (green) and **hunters** (cyan) — locked in a **predator/prey** relationship. Grazers are a renewable prey that spread like a tissue; hunters are a pack predator that sweeps through them and converts them.
+A three-level food chain with three cell types — **grazers** (green), **hunters** (cyan), and the **apex** predator (red) — each one preying on the level below.
 
-Unlike a stable food web — which tends to settle into still-lifes just like plain Conway — this coupling is deliberately **unstable**, and that is what makes it interesting. The two species behave like an [excitable medium](https://en.wikipedia.org/wiki/Excitable_medium): grazers spread as a renewable tissue, hunters sweep through them as **hunting waves**, and the bare ground left behind regrows. The result is perpetual motion — travelling fronts, spirals, and boom/bust population cycles — instead of a frozen board.
+Grazers and hunters form a deliberately **unstable** predator/prey coupling, and that is what makes it interesting. The two behave like an [excitable medium](https://en.wikipedia.org/wiki/Excitable_medium): grazers spread as a renewable tissue, hunters sweep through them as **hunting waves**, and the bare ground left behind regrows. The result is perpetual motion — travelling fronts, spirals, and boom/bust population cycles — instead of a frozen board.
 
-The interaction runs in **both directions**:
+The **apex** sits one level higher and converts the hunters the way hunters convert grazers. Having no predator of its own, it is the one species robust enough to settle down: among its own kind it runs **plain Conway's Life**, so it carries the full Conway repertoire — a 2×2 apex **block is a permanent still-life**, three in a row is a **blinker**, the **glider** crawls. Conway's own overpopulation rule keeps it from ever filling the board, so the grazer/hunter waves keep churning underneath while apex colonies hunt, expand, and consolidate into **stable patterns**.
 
-- Grazers feed the hunters (and are caught by them).
-- Hunters thin the grazers, opening space the grazers then recolonize.
+The interaction runs in **both directions** at every level:
 
-A future third species — an **apex** predator that preys on the hunters — is reserved in the encoding and rules for later.
+- Grazers feed the hunters (and are caught by them); hunters feed the apex (and are caught by it).
+- Hunters thin the grazers and the apex thins the hunters, opening space the level below then recolonizes.
 
 #### Grazer Rules (green) — the prey
 
@@ -34,12 +34,20 @@ A future third species — an **apex** predator that preys on the hunters — is
 - **Survives** with **2–8** grazer neighbors.
 - **Is caught** — converted into a hunter — when touched by **3 or more** hunters (see Predation).
 
-#### Hunter Rules (cyan) — the predator
+#### Hunter Rules (cyan) — the mid predator
 
 - **Hunts:** any grazer with **3+** hunter neighbors becomes a hunter next tick (prey biomass is turned into more hunters — this is how cyan advances through green).
 - **Spreads** to bare ground with **2–3** hunter neighbors *and* at least **1** adjacent grazer host.
 - **Starves** (dies) with no adjacent grazer — so once a region is hunted out, the pack dies back, leaving bare ground for the grazers to reclaim.
 - **Overcrowds** (dies) with **4+** hunter neighbors — so the pack can never solidify into a static block; its fronts stay thin and keep moving toward fresh prey.
+- **Is caught** — converted into an apex — when touched by **3 or more** apex (see Apex).
+
+#### Apex Rules (red) — the top predator
+
+- **Hunts:** any hunter with **3+** apex neighbors becomes an apex next tick (the apex advances through the hunters just as the hunters advance through the grazers).
+- **Survives** with **2–3** apex neighbors, and **is born** on bare ground with exactly **3** apex neighbors — i.e. plain **Conway's Game of Life** among its own kind. This is what lets the apex form **stable still-lifes, oscillators, and spaceships** (blocks, blinkers, gliders, …).
+- **Spreads** toward prey: beside at least **1** hunter host it also seeds at the lower count of **2** apex neighbors, so an established colony pushes into an adjacent hunter field and consumes it. (Away from prey this never fires, so isolated apex structures stay perfectly stable.)
+- **Has no predator** and does not starve — but Conway **overpopulation** (4+ apex neighbors) erodes any solid mass, so the apex can never blanket the board and the ecosystem below keeps running.
 
 ## Pages
 
@@ -126,7 +134,7 @@ Best for very dense boards (most cells alive).
 
 ### Predator Encoding Modes (game mode 1)
 
-Cell values: `0` = dead, `1` = grazer, `2` = hunter.
+Cell values: `0` = dead, `1` = grazer, `2` = hunter, `3` = apex.
 
 #### Mode 0 — 2-Bit Bitmap
 

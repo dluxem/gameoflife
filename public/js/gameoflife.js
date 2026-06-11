@@ -2,7 +2,7 @@
 const CELL_DEAD = 0;
 const CELL_GRAZER = 1;
 const CELL_HUNTER = 2;
-/* const CELL_APEX = 3; */   // reserved for a future third species (apex predator)
+const CELL_APEX = 3;
 
 /* Game mode constants */
 const GAME_MODE_CLASSIC = 0;
@@ -36,6 +36,39 @@ class GameOfLife {
             hunterBirthMin: 2,      // empty cell becomes hunter with this many...
             hunterBirthMax: 3,      // ...to this many hunter neighbors,
             hunterBirthMinHost: 1,  // ...and at least this many grazer neighbors (food)
+
+            /*
+             * Apex (red) — the top predator, one trophic level above the hunter.
+             * It preys on hunters the way hunters prey on grazers: a hunter
+             * surrounded by enough apex cells is caught and converted. With no
+             * predator of its own, the apex is the one species robust enough to
+             * settle down — among its own kind it follows Conway's Life exactly
+             * (survive 2-3, born on 3, die otherwise). That gives it the full
+             * Conway repertoire — a 2x2 apex block is a permanent still-life,
+             * three in a row is a blinker, the glider crawls — so deliberate
+             * stable (and oscillating) patterns are possible. Conway's own
+             * overpopulation rule keeps apex from ever solidifying into a board-
+             * filling mass, so the grazer/hunter waves keep churning underneath.
+             */
+            apexHuntMin: 3,         // a hunter with >= this many apex neighbors is
+                                    // caught and becomes apex next tick
+            apexSurviveMin: 2,      // apex survives with this many...
+            apexSurviveMax: 3,      // ...to this many apex neighbors (Conway band)
+            apexBirthMin: 3,        // empty cell becomes apex with this many...
+            apexBirthMax: 3,        // ...to this many apex neighbors (Conway birth)
+
+            /*
+             * Predatory spread: next to hunter prey the apex also seeds at the
+             * lower count of 2 apex neighbors (apexHuntBirthMin), the way hunters
+             * seed beside grazers. This only fires when a hunter host is adjacent,
+             * so an isolated apex colony still obeys pure Conway and stays a
+             * still-life — but a colony sitting next to a field of hunters pushes
+             * into it and consumes it. That is what keeps the apex a persistent,
+             * active top predator instead of a transient that leaves one block.
+             */
+            apexHuntBirthMin: 2,    // beside a hunter host, empty cell becomes apex
+                                    // with this many apex neighbors (<= Conway birth)
+            apexBirthMinHost: 1,    // ...requiring at least this many hunter hosts
         };
     }
 
@@ -81,7 +114,7 @@ class GameOfLife {
     }
 
     countNeighborsByType(x, y) {
-        let grazer = 0, hunter = 0;
+        let grazer = 0, hunter = 0, apex = 0;
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
                 if (dx === 0 && dy === 0) continue;
@@ -91,10 +124,11 @@ class GameOfLife {
                     const v = this.grid[ny * this.width + nx];
                     if (v === CELL_GRAZER) grazer++;
                     else if (v === CELL_HUNTER) hunter++;
+                    else if (v === CELL_APEX) apex++;
                 }
             }
         }
-        return { total: grazer + hunter, grazer, hunter };
+        return { total: grazer + hunter + apex, grazer, hunter, apex };
     }
 
     step() {
@@ -136,6 +170,12 @@ class GameOfLife {
      *     sustains spiral/ring waves rather than freezing.
      *   - Hunters also die when packed too tightly, so they can never settle into a
      *     solid sterile block; the pack is forced to keep moving toward fresh prey.
+     *   - Apex (red) sit one level higher again: they CONVERT adjacent hunters into
+     *     more apex, just as hunters convert grazers. Having no predator of their
+     *     own, apex don't starve or overcrowd-to-extinction on contact — among
+     *     themselves they run plain Conway's Life, so they can consolidate into
+     *     stable still-lifes and oscillators once an area is cleared, while Conway
+     *     overpopulation stops them from ever filling the board.
      */
     _stepPredator() {
         const next = new Uint8Array(this.width * this.height);
@@ -153,15 +193,31 @@ class GameOfLife {
                         next[idx] = CELL_GRAZER;              // Conway survival
                     }                                         // else: dies of over/under-population
                 } else if (cell === CELL_HUNTER) {
-                    if (n.grazer >= r.hunterStarveMinHost && n.hunter < r.hunterOvercrowdMax) {
+                    if (n.apex >= r.apexHuntMin) {
+                        next[idx] = CELL_APEX;               // caught by the apex pack
+                    } else if (n.grazer >= r.hunterStarveMinHost && n.hunter < r.hunterOvercrowdMax) {
                         next[idx] = CELL_HUNTER;              // fed and uncrowded -> persists
                     }                                         // else: starves or overcrowds
+                } else if (cell === CELL_APEX) {
+                    if (n.apex >= r.apexSurviveMin && n.apex <= r.apexSurviveMax) {
+                        next[idx] = CELL_APEX;               // Conway survival among apex
+                    }                                         // else: under/over-population
                 } else {
-                    if (n.grazer >= r.grazerBirthMin && n.grazer <= r.grazerBirthMax) {
-                        next[idx] = CELL_GRAZER;              // prey colonises empty space first
+                    // Apex births are resolved first. They only ever fire next to
+                    // existing apex, so this can't invade open grazer territory, but
+                    // it stops grazers from stealing the empty cells the apex needs to
+                    // reform into stable still-lifes — without this the apex's Conway
+                    // structures never consolidate amid grazers and it dies out.
+                    if (n.apex >= r.apexBirthMin && n.apex <= r.apexBirthMax) {
+                        next[idx] = CELL_APEX;               // apex reproduces by Conway birth
+                    } else if (n.apex >= r.apexHuntBirthMin && n.apex <= r.apexBirthMax
+                               && n.hunter >= r.apexBirthMinHost) {
+                        next[idx] = CELL_APEX;               // apex pushes into adjacent prey
+                    } else if (n.grazer >= r.grazerBirthMin && n.grazer <= r.grazerBirthMax) {
+                        next[idx] = CELL_GRAZER;             // prey colonises empty space
                     } else if (n.hunter >= r.hunterBirthMin && n.hunter <= r.hunterBirthMax
                                && n.grazer >= r.hunterBirthMinHost) {
-                        next[idx] = CELL_HUNTER;              // pack seeds next to its prey
+                        next[idx] = CELL_HUNTER;             // pack seeds next to its prey
                     }
                 }
             }
@@ -178,12 +234,13 @@ class GameOfLife {
     }
 
     populationByType() {
-        let grazer = 0, hunter = 0;
+        let grazer = 0, hunter = 0, apex = 0;
         for (let i = 0; i < this.grid.length; i++) {
             if (this.grid[i] === CELL_GRAZER) grazer++;
             else if (this.grid[i] === CELL_HUNTER) hunter++;
+            else if (this.grid[i] === CELL_APEX) apex++;
         }
-        return { grazer, hunter };
+        return { grazer, hunter, apex };
     }
 
     clear() { this.grid.fill(0); }
@@ -216,6 +273,26 @@ class GameOfLife {
                 }
             }
         }
+        // ...and a few apex "broods". Each is an R-pentomino — a tiny but famously
+        // long-lived Conway pattern — so the apex doesn't sit inert: it churns and
+        // expands for hundreds of generations, plowing through hunter packs and
+        // converting them, before finally settling into stable apex still-lifes.
+        // Each brood gets a small cleared nursery so its Conway ignition isn't
+        // smothered by the surrounding grazer tissue before it can establish.
+        const broods = Math.max(3, Math.round((this.width * this.height) / 800));
+        const R_PENTOMINO = [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]];
+        for (let b = 0; b < broods; b++) {
+            const cx = Math.floor(Math.random() * (this.width - 2));
+            const cy = Math.floor(Math.random() * (this.height - 2));
+            for (let dy = -2; dy <= 4; dy++) {
+                for (let dx = -2; dx <= 4; dx++) {
+                    this.set(cx + dx, cy + dy, CELL_DEAD);
+                }
+            }
+            for (const [dx, dy] of R_PENTOMINO) {
+                this.set(cx + dx, cy + dy, CELL_APEX);
+            }
+        }
     }
 
     invert() {
@@ -239,6 +316,7 @@ class GameRenderer {
         this.cellSize = options.cellSize || this._calcCellSize(options.maxWidth || 800);
         this.colorAlive = options.colorAlive || '#39ff14';
         this.colorHunter = options.colorHunter || '#00e5ff';
+        this.colorApex = options.colorApex || '#ff2d6b';
         this.colorDead = options.colorDead || '#181830';
         this.colorGrid = options.colorGrid || '#3a3a5c';
         this.showGrid = options.showGrid !== false;
@@ -288,6 +366,12 @@ class GameRenderer {
                     );
                 } else if (v === CELL_HUNTER) {
                     ctx.fillStyle = this.colorHunter;
+                    ctx.fillRect(
+                        x * cellSize + pad, y * cellSize + pad,
+                        cellSize - pad * 2, cellSize - pad * 2
+                    );
+                } else if (v === CELL_APEX) {
+                    ctx.fillStyle = this.colorApex;
                     ctx.fillRect(
                         x * cellSize + pad, y * cellSize + pad,
                         cellSize - pad * 2, cellSize - pad * 2

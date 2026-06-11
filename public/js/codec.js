@@ -31,7 +31,7 @@
  *
  * --- Predator game mode (game mode 1) ---
  *
- *   Cell values: 0=dead, 1=grazer, 2=hunter
+ *   Cell values: 0=dead, 1=grazer, 2=hunter, 3=apex
  *
  *   Encoding mode 0 — 2-bit bitmap:
  *     2 bits per cell, MSB first: bits[7-6]=cell0 .. bits[1-0]=cell3.
