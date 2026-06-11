@@ -218,30 +218,6 @@ class GameOfLife {
         }
     }
 
-    /*
-     * A deterministic "interesting" starting board for predator mode: a field of
-     * grazers carrying two counter-rotating broken waves. Each wave is a line of
-     * hunters (excited) trailed by a short strip of bare ground (refractory); the
-     * free end of a broken wave curls into a spiral, so on play the pair seeds the
-     * whole board with sustained predator/prey waves. The two waves are offset by
-     * one cell to avoid perfect symmetry. Used as the editor's opening pattern.
-     */
-    seedShowcase() {
-        this.grid.fill(CELL_GRAZER);
-        const my = this.height >> 1;
-        const xm = this.width >> 1;
-        for (let x = 0; x < xm; x++) {                 // upper wave, travels right
-            this.set(x, my, CELL_HUNTER);
-            this.set(x, my - 1, CELL_DEAD);
-            this.set(x, my - 2, CELL_DEAD);
-        }
-        for (let x = xm + 1; x < this.width; x++) {    // lower wave, travels left
-            this.set(x, my + 1, CELL_HUNTER);
-            this.set(x, my + 2, CELL_DEAD);
-            this.set(x, my + 3, CELL_DEAD);
-        }
-    }
-
     invert() {
         for (let i = 0; i < this.grid.length; i++) {
             this.grid[i] = this.grid[i] ? 0 : 1;

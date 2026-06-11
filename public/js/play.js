@@ -19,13 +19,13 @@
             game = new GameOfLife(width, height, undefined, gameMode);
         }
     } else {
-        // Fresh visit: open in Predator mode with an interesting live pattern so
-        // the ecosystem is one PLAY away. CLEAR empties the board to start fresh.
+        // Fresh visit: start with an empty board. Predator mode is selected by
+        // default; switching to Classic (or back) keeps the board empty. Draw
+        // cells, or press RANDOM, to build a map.
         width = 50;
         height = 34;
         gameMode = GAME_MODE_PREDATOR;
         game = new GameOfLife(width, height, undefined, gameMode);
-        game.seedShowcase();
         document.getElementById('mapWidth').value = width;
         document.getElementById('mapHeight').value = height;
     }

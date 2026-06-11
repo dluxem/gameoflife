@@ -48,7 +48,7 @@ A future third species — an **apex** predator that preys on the hunters — is
 | Home | `index.html` | Enter a map code to load, or navigate to the editor |
 | Editor / Player | `play.html` | Create a new map, draw cells, run the simulation, and share |
 
-Opening `play.html` without a hash starts in Predator mode with a ready-made "interesting" board — two counter-rotating waves on a 50×34 grid that bloom into the predator/prey ecosystem as soon as you press **PLAY**. Press **CLEAR** to empty the board and start from scratch. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
+Opening `play.html` without a hash starts with an empty 50×34 board in Predator mode. Draw cells (or press **RANDOM**) to build a map, and use the **MODE** buttons to switch between Classic and Predator — the board stays empty until you draw. Opening `play.html#CODE` pre-loads the encoded map and automatically selects the correct game mode. Share URLs always point to `play.html#CODE`.
 
 ## Map Code Encoding
 
